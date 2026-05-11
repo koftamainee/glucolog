@@ -35,7 +35,6 @@ const Render = (() => {
     function insulin(data) {
         document.getElementById('bolus').value = data.bolus || '';
         document.getElementById('basal').value = data.basal || '';
-        // bolusTime and basalTime are set fresh on load, don't overwrite with stale data
     }
 
     function meals(dateKey, data) {

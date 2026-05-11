@@ -320,12 +320,13 @@ canvas#glucoseChart {
 
 .meal-fields input {
     flex: 1;
-    padding: 6px 8px;
-    border: 1px solid var(--border, #ccc);
-    border-radius: var(--radius-sm, 6px);
-    font-size: 12px;
-    background-color: #000000;
-    color: #ffffff;
+    padding: 8px 10px;
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text);
 }
 
 .meal-card {
@@ -380,23 +381,32 @@ canvas#glucoseChart {
 }
 
 .meal-food {
-    background-color: #000000;
-    font-size: 13px;
-    color: var(--text-sec);
-    min-height: 24px;
+    background: var(--bg);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    min-height: 36px;
     outline: none;
-    border-radius: 4px;
-    padding: 1px 2px;
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    border: 0.5px solid var(--border-med);
+    line-height: 1.4;
+    text-transform: none;
+    letter-spacing: normal;
+    display: block;
 }
 
 .meal-food:empty::before {
     content: attr(data-ph);
     color: var(--text-ter);
     pointer-events: none;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: normal;
 }
 
 .meal-food:focus {
-    background: var(--bg-ter);
+    border-color: var(--accent);
 }
 
 .water-track {
