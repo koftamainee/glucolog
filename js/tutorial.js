@@ -224,6 +224,7 @@ const Tutorial = (() => {
     function start(force = false) {
         if (!force && !shouldShow()) return;
 
+        current = 0
         build();
 
         requestAnimationFrame(() => {
