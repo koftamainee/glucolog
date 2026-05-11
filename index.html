@@ -1,157 +1,173 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
 
-  <title>Glucolog</title>
+    <title>Glucolog</title>
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Glucolog">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Glucolog">
 
-  <meta
-    name="theme-color"
-    content="#ffffff"
-    media="(prefers-color-scheme: light)"
-  >
+    <meta
+            name="theme-color"
+            content="#ffffff"
+            media="(prefers-color-scheme: light)"
+    >
 
-  <meta
-    name="theme-color"
-    content="#1a1a1a"
-    media="(prefers-color-scheme: dark)"
-  >
+    <meta
+            name="theme-color"
+            content="#1a1a1a"
+            media="(prefers-color-scheme: dark)"
+    >
 
-  <link rel="icon" href="icons/favicon.ico">
+    <link rel="icon" href="icons/favicon.ico">
 
-  <link
-    rel="icon"
-    type="image/png"
-    sizes="16x16"
-    href="icons/favicon-16x16.png"
-  >
+    <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="icons/favicon-16x16.png"
+    >
 
-  <link
-    rel="icon"
-    type="image/png"
-    sizes="32x32"
-    href="icons/favicon-32x32.png"
-  >
+    <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="icons/favicon-32x32.png"
+    >
 
-  <link
-    rel="apple-touch-icon"
-    sizes="180x180"
-    href="icons/apple-touch-icon.png"
-  >
+    <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="icons/apple-touch-icon.png"
+    >
 
-  <link rel="manifest" href="site.webmanifest">
+    <link rel="manifest" href="site.webmanifest">
 
-  <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="app">
+<div class="app">
 
     <header class="header">
-      <h1>Glucolog</h1>
-      <div class="date-nav">
-        <button id="prevDay" aria-label="Предыдущий день">‹</button>
-        <span class="date-label" id="dateLabel"></span>
-        <button id="nextDay" aria-label="Следующий день">›</button>
-      </div>
+        <h1>Glucolog</h1>
+        <div class="date-nav">
+            <button id="prevDay" aria-label="Предыдущий день">‹</button>
+            <span class="date-label" id="dateLabel"></span>
+            <button id="nextDay" aria-label="Следующий день">›</button>
+        </div>
     </header>
 
     <section class="section" id="sec-glucose">
-      <div class="section-title">Глюкоза крови</div>
-      <div class="chart-wrap">
-        <canvas id="glucoseChart"></canvas>
-      </div>
-      <div class="chart-xlabels">
-        <span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
-      </div>
-      <div class="add-glucose">
-        <input type="number" id="glucoseVal" placeholder="ммоль/л" min="1" max="30" step="0.1" aria-label="Значение глюкозы">
-        <select id="glucoseHour" aria-label="Час измерения"></select>
-        <button id="addGlucoseBtn" class="btn">+ добавить</button>
-      </div>
+        <div class="section-title">Глюкоза и инсулин</div>
+        <div class="chart-wrap">
+            <canvas id="glucoseChart"></canvas>
+        </div>
+        <div class="chart-legend">
+            <span style="--legend-color:#1D9E75">Глюкоза</span>
+            <span style="--legend-color:#E05A33">Болюс</span>
+            <span style="--legend-color:#507FCC">Базальный</span>
+        </div>
+        <div class="chart-xlabels">
+            <span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+        </div>
+        <div class="add-entry">
+            <input type="number" id="glucoseVal" placeholder="Глюкоза ммоль/л" min="1" max="30" step="0.1" aria-label="Значение глюкозы">
+            <input type="time" id="glucoseTime" aria-label="Время измерения глюкозы">
+            <button id="addGlucoseBtn" class="btn">+ глюкоза</button>
+        </div>
     </section>
 
     <section class="section" id="sec-insulin">
-      <div class="section-title">Инсулин</div>
-      <div class="ins-row">
-        <label for="bolus">Болюс</label>
-        <input type="number" id="bolus" placeholder="ед." min="0" step="0.5" aria-label="Болюс">
-        <label for="basal">Базальный</label>
-        <input type="number" id="basal" placeholder="ед." min="0" step="0.5" aria-label="Базальный инсулин">
-      </div>
+        <div class="section-title">Инсулин</div>
+        <div class="ins-card">
+            <div class="ins-card-label">Болюс</div>
+            <div class="ins-card-row">
+                <input type="number" id="bolus" placeholder="ед." min="0" step="0.5" aria-label="Болюс">
+                <input type="time" id="bolusTime" aria-label="Время болюса">
+                <button id="addBolusBtn" class="btn">+ болюс</button>
+            </div>
+        </div>
+        <div class="ins-card">
+            <div class="ins-card-label">Базальный</div>
+            <div class="ins-card-row">
+                <input type="number" id="basal" placeholder="ед." min="0" step="0.5" aria-label="Базальный инсулин">
+                <input type="time" id="basalTime" aria-label="Время базального">
+                <button id="addBasalBtn" class="btn">+ базальный</button>
+            </div>
+        </div>
     </section>
 
     <section class="section" id="sec-meals">
-      <div class="section-title">Приёмы пищи</div>
-      <div class="meal-list" id="mealList"></div>
+        <div class="section-title">Приёмы пищи</div>
+        <div class="meal-list" id="mealList"></div>
     </section>
 
     <section class="section" id="sec-water">
-      <div class="section-title">Вода</div>
-      <div class="section-hint">Норма: 8 стаканов × 200 мл</div>
-      <div class="water-track" id="waterTrack"></div>
+        <div class="section-title">Вода</div>
+        <div class="section-hint">Норма: 8 стаканов × 200 мл</div>
+        <div class="water-track" id="waterTrack"></div>
     </section>
 
     <section class="section" id="sec-sport">
-      <div class="section-title">Спорт</div>
-      <div class="toggle-row" id="sportRow">
-        <button class="toggle-btn" data-val="true">Да</button>
-        <button class="toggle-btn active" data-val="false">Нет</button>
-      </div>
-      <div class="steps-row">
-        <input type="number" id="steps" placeholder="0" min="0" aria-label="Количество шагов">
-        <span class="steps-label">шагов</span>
-      </div>
+        <div class="section-title">Спорт</div>
+        <div class="toggle-row" id="sportRow">
+            <button class="toggle-btn" data-val="true">Да</button>
+            <button class="toggle-btn active" data-val="false">Нет</button>
+        </div>
+        <div class="steps-row">
+            <input type="number" id="steps" placeholder="0" min="0" aria-label="Количество шагов">
+            <span class="steps-label">шагов</span>
+        </div>
     </section>
 
     <section class="section" id="sec-stool">
-      <div class="section-title">Стул</div>
-      <div class="stool-grid" id="stoolGrid"></div>
+        <div class="section-title">Стул</div>
+        <div class="stool-grid" id="stoolGrid"></div>
     </section>
 
     <section class="section" id="sec-sleep">
-      <div class="section-title">Сон</div>
-      <div class="sleep-row">
-        <div class="sleep-pair">
-          <label for="sleepStart">Лёг</label>
-          <input type="time" id="sleepStart" aria-label="Время отхода ко сну">
+        <div class="section-title">Сон</div>
+        <div class="sleep-row">
+            <div class="sleep-pair">
+                <label for="sleepStart">Лёг</label>
+                <input type="time" id="sleepStart" aria-label="Время отхода ко сну">
+            </div>
+            <div class="sleep-pair">
+                <label for="sleepEnd">Встал</label>
+                <input type="time" id="sleepEnd" aria-label="Время подъёма">
+            </div>
+            <span class="sleep-duration" id="sleepDuration"></span>
         </div>
-        <div class="sleep-pair">
-          <label for="sleepEnd">Встал</label>
-          <input type="time" id="sleepEnd" aria-label="Время подъёма">
-        </div>
-        <span class="sleep-duration" id="sleepDuration"></span>
-      </div>
     </section>
 
     <section class="section" id="sec-stress">
-      <div class="section-title">Стресс</div>
-      <div class="toggle-row" id="stressRow"></div>
+        <div class="section-title">Стресс</div>
+        <div class="toggle-row" id="stressRow"></div>
     </section>
 
     <section class="section" id="sec-notes">
-      <div class="section-title">Заметки</div>
-      <textarea id="notes" class="notes" placeholder="Заметки дня..." rows="3" aria-label="Заметки"></textarea>
+        <div class="section-title">Заметки</div>
+        <textarea id="notes" class="notes" placeholder="Заметки дня..." rows="3" aria-label="Заметки"></textarea>
     </section>
 
     <section class="section last" id="sec-conclusions">
-      <div class="section-title">Выводы дня</div>
-      <textarea id="conclusions" class="notes" placeholder="Выводы..." rows="3" aria-label="Выводы дня"></textarea>
+        <div class="section-title">Выводы дня</div>
+        <textarea id="conclusions" class="notes" placeholder="Выводы..." rows="3" aria-label="Выводы дня"></textarea>
     </section>
 
-  </div>
+</div>
 
-  <script src="js/storage.js"></script>
-  <script src="js/chart.js"></script>
-  <script src="js/render.js"></script>
-  <script src="js/app.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
