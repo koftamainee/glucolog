@@ -25,19 +25,19 @@ const Tutorial = (() => {
             nextOnClick: true,
         },
         {
-            target: '#glucoseVal',
+            target: '#sec-glucose',
             title: 'Глюкоза',
             text: 'Добавляйте измерения сахара здесь.',
             nextOnClick: true,
         },
         {
-            target: '#mealList',
+            target: '#sec-meals',
             title: 'Приемы пищи',
             text: 'Фиксируйте еду, эмоции и ощущения.',
             nextOnClick: true,
         },
         {
-            target: '.log-card',
+            target: '#sec-log',
             title: 'Журнал',
             text: 'Здесь отображается история всех измерений и инсулина.',
             nextOnClick: true,
@@ -93,20 +93,29 @@ const Tutorial = (() => {
 
         const boxWidth = Math.min(320, window.innerWidth - 32);
 
+        box.style.position = 'fixed';
+        box.style.width = `${boxWidth}px`;
+
+        const boxHeight = box.offsetHeight || 120;
+
         let top = rect.bottom + 12;
         let left = rect.left;
 
         if (left + boxWidth > window.innerWidth) {
             left = window.innerWidth - boxWidth - 12;
         }
-
         if (left < 12) left = 12;
-        if (top < 12) top = 12;
 
-        box.style.position = 'fixed';
+        if (top + boxHeight > window.innerHeight) {
+            top = rect.top - boxHeight - 12;
+        }
+
+        if (top < 12) {
+            top = 12;
+        }
+
         box.style.top = `${top}px`;
         box.style.left = `${left}px`;
-        box.style.width = `${boxWidth}px`;
     }
 
     function bindReposition(target) {
