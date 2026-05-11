@@ -462,7 +462,7 @@ canvas#glucoseChart {
 }
 
 .sleep-pair input {
-  flex: 1;
+  width: 110px;
   padding: 8px 10px;
   font-size: 14px;
   background: var(--bg);
