@@ -39,6 +39,10 @@
         document.getElementById('prevDay').addEventListener('click', () => shiftDay(-1));
         document.getElementById('nextDay').addEventListener('click', () => shiftDay(1));
 
+        document.querySelector('.header h1').addEventListener('click', () => {
+            Sidebar.open(() => renderAll());
+        });
+
         document.getElementById('dateLabel').addEventListener('click', () => {
             Calendar.open(currentDay, key => {
                 currentDay = key;
