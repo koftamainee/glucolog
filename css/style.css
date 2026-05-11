@@ -249,19 +249,25 @@ canvas#glucoseChart {
 .add-entry {
     display: flex;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: var(--bg-sec);
+    border-radius: var(--radius-md);
     align-items: center;
-    flex-wrap: wrap;
 }
 
 .add-entry input[type="number"] {
-    flex: 1;
-    min-width: 60px;
+    width: 80px;
+    flex-shrink: 0;
 }
 
 .add-entry input[type="time"] {
-    width: auto;
-    min-width: 100px;
+    flex: 1;
+    min-width: 0;
+}
+
+.add-entry .btn {
+    flex-shrink: 0;
 }
 
 .ins-card {
@@ -288,11 +294,16 @@ canvas#glucoseChart {
 
 .ins-card-row input[type="number"] {
     width: 80px;
+    flex-shrink: 0;
 }
 
 .ins-card-row input[type="time"] {
     flex: 1;
     min-width: 0;
+}
+
+.ins-card-row .btn {
+    flex-shrink: 0;
 }
 
 .meal-list {

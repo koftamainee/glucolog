@@ -1,6 +1,6 @@
 const GlucoseChart = (() => {
-    const MIN_G = 0.5;
-    const MAX_G = 18;
+    const MIN_G = 1;
+    const MAX_G = 17.5;
     const RANGE_LO = 4;
     const RANGE_HI = 8;
     const MAX_INS = MAX_G;
