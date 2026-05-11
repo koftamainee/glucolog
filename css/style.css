@@ -575,3 +575,148 @@ textarea.notes:focus {
         filter: invert(1);
     }
 }
+.cal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+
+.cal-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.cal-popup {
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border-med);
+    padding: 16px;
+    width: 300px;
+    max-width: calc(100vw - 32px);
+    transform: scale(0.94) translateY(8px);
+    transition: transform 0.15s, opacity 0.15s;
+    opacity: 0;
+}
+
+.cal-popup.visible {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.cal-month-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.cal-nav {
+    background: none;
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    cursor: pointer;
+    color: var(--text-sec);
+    font-size: 18px;
+    line-height: 1;
+    transition: background 0.1s;
+}
+
+.cal-nav:active {
+    background: var(--bg-sec);
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 12px;
+}
+
+.cal-dow {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-ter);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 0 6px;
+}
+
+.cal-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-sec);
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+}
+
+.cal-cell:hover {
+    background: var(--bg-sec);
+    color: var(--text);
+}
+
+.cal-cell.empty {
+    cursor: default;
+}
+
+.cal-cell.today {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.cal-cell.selected {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+.cal-cell.selected.today {
+    color: #fff;
+}
+
+.cal-today-btn {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-sec);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-sec);
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.cal-today-btn:active {
+    background: var(--bg-ter);
+}
+
+#dateLabel {
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    transition: background 0.1s;
+}
+
+#dateLabel:hover {
+    background: var(--bg-sec);
+}

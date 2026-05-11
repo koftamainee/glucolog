@@ -39,6 +39,13 @@
         document.getElementById('prevDay').addEventListener('click', () => shiftDay(-1));
         document.getElementById('nextDay').addEventListener('click', () => shiftDay(1));
 
+        document.getElementById('dateLabel').addEventListener('click', () => {
+            Calendar.open(currentDay, key => {
+                currentDay = key;
+                renderAll();
+            });
+        });
+
         // Fix 3: set current time on load for all time inputs
         document.getElementById('glucoseTime').value  = nowTimeString();
         document.getElementById('bolusTime').value    = nowTimeString();
