@@ -15,6 +15,12 @@ const Render = (() => {
 
     const STRESS_OPTS = ['Нет', 'Да', 'Хронический'];
 
+    function timeToFloat(timeStr) {
+        if (!timeStr) return null;
+        const [h, m] = timeStr.split(':').map(Number);
+        return h + m / 60;
+    }
+
     function floatToTime(hourFloat) {
         const h = Math.floor(hourFloat);
         const m = Math.round((hourFloat - h) * 60);
@@ -319,6 +325,7 @@ const Render = (() => {
         glucose,
         log,
         calcSleepDuration,
-        floatToTime
+        floatToTime,
+        timeToFloat
     };
 })();
