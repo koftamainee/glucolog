@@ -248,6 +248,22 @@ canvas#glucoseChart {
   gap: 10px;
 }
 
+.meal-fields {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.meal-fields input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border, #ccc);
+  border-radius: var(--radius-sm, 6px);
+  font-size: 12px;
+  background-color: #000000;
+  color: #ffffff;
+}
+
 .meal-card {
   background: var(--bg-sec);
   border-radius: var(--radius-md);
@@ -300,6 +316,7 @@ canvas#glucoseChart {
 }
 
 .meal-food {
+  background-color: #000000;
   font-size: 13px;
   color: var(--text-sec);
   min-height: 24px;
