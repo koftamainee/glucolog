@@ -311,5 +311,5 @@ const Render = (() => {
         log(dateKey, data);
     }
 
-    return { all, glucose, calcSleepDuration, timeToFloat, floatToTime };
+    return { all, glucose, log, calcSleepDuration, timeToFloat, floatToTime };
 })();

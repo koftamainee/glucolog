@@ -50,7 +50,6 @@
             });
         });
 
-        // Fix 3: set current time on load for all time inputs
         document.getElementById('glucoseTime').value  = nowTimeString();
         document.getElementById('bolusTime').value    = nowTimeString();
         document.getElementById('basalTime').value    = nowTimeString();
@@ -64,6 +63,7 @@
             document.getElementById('glucoseVal').value = '';
             document.getElementById('glucoseTime').value = nowTimeString();
             Render.glucose(currentDay, Storage.getDay(currentDay));
+            Render.log(currentDay, Storage.getDay(currentDay));
         });
 
         document.getElementById('glucoseVal').addEventListener('keydown', e => {
@@ -79,6 +79,7 @@
             document.getElementById('bolus').value = '';
             document.getElementById('bolusTime').value = nowTimeString();
             Render.glucose(currentDay, Storage.getDay(currentDay));
+            Render.log(currentDay, Storage.getDay(currentDay));
         });
 
         document.getElementById('addBasalBtn').addEventListener('click', () => {
@@ -90,6 +91,7 @@
             document.getElementById('basal').value = '';
             document.getElementById('basalTime').value = nowTimeString();
             Render.glucose(currentDay, Storage.getDay(currentDay));
+            Render.log(currentDay, Storage.getDay(currentDay));
         });
 
         document.getElementById('sportRow').addEventListener('click', e => {
