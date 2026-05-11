@@ -312,26 +312,6 @@ canvas#glucoseChart {
     gap: 10px;
 }
 
-.meal-fields {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-    width: 100%;
-}
-
-.meal-fields input {
-    flex: 1;
-    min-width: 0;
-    box-sizing: border-box;
-    padding: 8px 10px;
-    border: 0.5px solid var(--border-med);
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-family: inherit;
-    background: var(--bg);
-    color: var(--text);
-}
-
 .meal-card {
     box-sizing: border-box;
     background: var(--bg-sec);
@@ -360,6 +340,11 @@ canvas#glucoseChart {
 .meal-meta input[type="time"] {
     font-size: 11px;
     padding: 3px 6px;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-sm);
 }
 
 .hunger-dots {
@@ -384,33 +369,53 @@ canvas#glucoseChart {
     border-color: var(--text-sec);
 }
 
-.meal-food {
-    background: var(--bg);
+.meal-food,
+.meal-fields textarea {
+    width: 100%;
+    box-sizing: border-box;
+
     font-size: 14px;
     font-family: inherit;
     color: var(--text);
-    min-height: 36px;
-    outline: none;
-    border-radius: var(--radius-sm);
-    padding: 8px 10px;
+
+    background: var(--bg);
     border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-sm);
+
+    padding: 8px 10px;
     line-height: 1.4;
-    text-transform: none;
-    letter-spacing: normal;
-    display: block;
+
+    outline: none;
+
+    resize: none;
+    overflow: hidden;
 }
 
-.meal-food:empty::before {
-    content: attr(data-ph);
-    color: var(--text-ter);
-    pointer-events: none;
-    text-transform: none;
-    letter-spacing: normal;
-    font-weight: normal;
+.meal-food {
+    min-height: 40px;
 }
 
-.meal-food:focus {
+.meal-fields {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.meal-fields textarea {
+    flex: 1;
+    min-width: 0;
+    min-height: 36px;
+}
+
+.meal-food:focus,
+.meal-fields textarea:focus {
     border-color: var(--accent);
+}
+
+.meal-food::placeholder,
+.meal-fields textarea::placeholder {
+    color: var(--text-ter);
 }
 
 .water-track {
