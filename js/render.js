@@ -32,11 +32,6 @@ const Render = (() => {
         GlucoseChart.draw(canvas, data.glucose || [], data.insulin || []);
     }
 
-    function insulin(data) {
-        document.getElementById('bolus').value = data.bolus || '';
-        document.getElementById('basal').value = data.basal || '';
-    }
-
     function meals(dateKey, data) {
         const container = document.getElementById('mealList');
         container.innerHTML = '';
@@ -306,7 +301,6 @@ const Render = (() => {
     function all(dateKey) {
         const data = Storage.getDay(dateKey);
         glucose(dateKey, data);
-        insulin(data);
         meals(dateKey, data);
         water(dateKey, data);
         sport(data);
