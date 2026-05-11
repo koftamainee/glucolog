@@ -134,6 +134,8 @@
     function init() {
         wireEvents();
         renderAll();
+
+        Tutorial.start()
     }
 
     document.addEventListener('DOMContentLoaded', init);

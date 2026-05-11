@@ -10,6 +10,7 @@ const Calendar = (() => {
         'Январь','Февраль','Март','Апрель','Май','Июнь',
         'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'
     ];
+
     const DAYS = ['пн','вт','ср','чт','пт','сб','вс'];
 
     function keyToDate(key) {
@@ -52,6 +53,7 @@ const Calendar = (() => {
 
     function render() {
         const today = todayKey();
+
         const firstDay = new Date(viewYear, viewMonth, 1);
         const lastDay  = new Date(viewYear, viewMonth + 1, 0);
 
@@ -64,6 +66,7 @@ const Calendar = (() => {
                 <span class="cal-month-label">${MONTHS[viewMonth]} ${viewYear}</span>
                 <button class="cal-nav" id="calNextMonth">›</button>
             </div>
+
             <div class="cal-grid">
         `;
 
@@ -77,52 +80,83 @@ const Calendar = (() => {
 
         for (let d = 1; d <= lastDay.getDate(); d++) {
             const key = dateToKey(new Date(viewYear, viewMonth, d));
+
             const isToday    = key === today;
             const isSelected = key === selectedKey;
+
             let cls = 'cal-cell';
-            if (isToday)    cls += ' today';
+
+            if (isToday) cls += ' today';
             if (isSelected) cls += ' selected';
-            html += `<div class="${cls}" data-key="${key}">${d}</div>`;
+
+            html += `
+                <div class="${cls}" data-key="${key}">
+                    ${d}
+                </div>
+            `;
         }
 
         html += `</div>`;
 
-        const todayBtn = `<button class="cal-today-btn" id="calTodayBtn">Сегодня</button>`;
-        html += todayBtn;
+        html += `
+            <button class="cal-today-btn" id="calTodayBtn">
+                Сегодня
+            </button>
+        `;
 
         popup.innerHTML = html;
 
-        popup.querySelector('#calPrevMonth').addEventListener('click', e => {
-            e.stopPropagation();
-            viewMonth--;
-            if (viewMonth < 0) { viewMonth = 11; viewYear--; }
-            render();
-        });
-
-        popup.querySelector('#calNextMonth').addEventListener('click', e => {
-            e.stopPropagation();
-            viewMonth++;
-            if (viewMonth > 11) { viewMonth = 0; viewYear++; }
-            render();
-        });
-
-        popup.querySelector('#calTodayBtn').addEventListener('click', e => {
-            e.stopPropagation();
-            select(todayKey());
-        });
-
-        popup.querySelectorAll('.cal-cell[data-key]').forEach(cell => {
-            cell.addEventListener('click', e => {
+        popup.querySelector('#calPrevMonth')
+            .addEventListener('click', e => {
                 e.stopPropagation();
-                select(cell.dataset.key);
+
+                viewMonth--;
+
+                if (viewMonth < 0) {
+                    viewMonth = 11;
+                    viewYear--;
+                }
+
+                render();
             });
-        });
+
+        popup.querySelector('#calNextMonth')
+            .addEventListener('click', e => {
+                e.stopPropagation();
+
+                viewMonth++;
+
+                if (viewMonth > 11) {
+                    viewMonth = 0;
+                    viewYear++;
+                }
+
+                render();
+            });
+
+        popup.querySelector('#calTodayBtn')
+            .addEventListener('click', e => {
+                e.stopPropagation();
+                select(todayKey());
+            });
+
+        popup.querySelectorAll('.cal-cell[data-key]')
+            .forEach(cell => {
+                cell.addEventListener('click', e => {
+                    e.stopPropagation();
+                    select(cell.dataset.key);
+                });
+            });
     }
 
     function select(key) {
         selectedKey = key;
+
         close();
-        if (onSelectCallback) onSelectCallback(key);
+
+        if (onSelectCallback) {
+            onSelectCallback(key);
+        }
     }
 
     function open(currentKey, onSelect) {
@@ -130,23 +164,29 @@ const Calendar = (() => {
         onSelectCallback = onSelect;
 
         const date = keyToDate(currentKey);
+
         viewYear  = date.getFullYear();
         viewMonth = date.getMonth();
 
-        if (!overlay) build();
+        if (!overlay) {
+            build();
+        }
 
         render();
+
         overlay.classList.add('visible');
         popup.classList.add('visible');
     }
 
     function close() {
         if (!overlay) return;
+
         overlay.classList.remove('visible');
         popup.classList.remove('visible');
-        document.removeEventListener('keydown', onKey);
-        document.addEventListener('keydown', onKey);
     }
 
-    return { open };
+    return {
+        open,
+        close,
+    };
 })();

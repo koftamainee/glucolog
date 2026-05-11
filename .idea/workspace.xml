@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0b03e650-a69b-4fa0-bc10-c39b88d89b82" name="Changes" comment="" />
+    <list default="true" id="0b03e650-a69b-4fa0-bc10-c39b88d89b82" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/js/tutorial.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/calendar.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/calendar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/render.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/render.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/sidebar.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/sidebar.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,6 +66,7 @@
       <updated>1778488790193</updated>
       <workItem from="1778488791239" duration="1908000" />
       <workItem from="1778491437164" duration="4505000" />
+      <workItem from="1778503438977" duration="3734000" />
     </task>
     <servers />
   </component>

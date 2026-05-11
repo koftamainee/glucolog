@@ -871,3 +871,291 @@ textarea.notes:focus {
 .header h1:hover {
     background: var(--bg-sec);
 }
+
+.log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.log-card {
+    display: flex;
+    gap: 12px;
+
+    background: var(--bg-sec);
+
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+
+    padding: 12px;
+
+    transition:
+            background 0.12s,
+            border-color 0.12s,
+            transform 0.08s;
+}
+
+.log-card:active {
+    transform: scale(0.985);
+}
+
+.log-time-col {
+    width: 52px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.log-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-ter);
+
+    padding-top: 2px;
+}
+
+.log-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.log-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.log-icon {
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: var(--radius-sm);
+
+    font-size: 17px;
+
+    background: var(--bg-ter);
+
+    border: 0.5px solid var(--border);
+}
+
+.log-main {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.log-label {
+    font-size: 13px;
+    font-weight: 600;
+
+    color: var(--text);
+}
+
+.log-value {
+    font-size: 14px;
+    color: var(--text-sec);
+}
+
+
+.log-card.normal {
+    border-color: rgba(29, 158, 117, 0.18);
+}
+
+.log-card.normal .log-icon {
+    background: var(--accent-bg);
+    color: var(--accent-text);
+    border-color: transparent;
+}
+
+.log-card.low {
+    border-color: rgba(80, 127, 204, 0.22);
+}
+
+.log-card.low .log-icon {
+    background: var(--info-bg);
+    color: var(--info-text);
+    border-color: transparent;
+}
+
+/* glucose high */
+
+.log-card.high {
+    border-color: rgba(224, 90, 51, 0.22);
+}
+
+.log-card.high .log-icon {
+    background: var(--warn-bg);
+    color: var(--warn-text);
+    border-color: transparent;
+}
+
+
+.log-card.insulin .log-icon {
+    background: rgba(224, 90, 51, 0.12);
+    color: var(--chart-bolus);
+    border-color: transparent;
+}
+
+
+.log-card.basal .log-icon {
+    background: rgba(80, 127, 204, 0.12);
+    color: var(--chart-basal);
+    border-color: transparent;
+}
+
+
+.log-empty-card {
+    background: var(--bg-sec);
+
+    border: 0.5px dashed var(--border-med);
+    border-radius: var(--radius-md);
+
+    padding: 28px 18px;
+
+    text-align: center;
+}
+
+.log-empty-icon {
+    font-size: 28px;
+
+    color: var(--text-ter);
+
+    margin-bottom: 8px;
+}
+
+.log-empty-title {
+    font-size: 14px;
+    font-weight: 600;
+
+    color: var(--text);
+
+    margin-bottom: 4px;
+}
+
+.log-empty-sub {
+    font-size: 13px;
+    color: var(--text-sec);
+
+    line-height: 1.4;
+}
+
+.tutorial-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    pointer-events: none;
+}
+
+.tutorial-highlight {
+    position: relative;
+    z-index: 501;
+    border-radius: 12px;
+
+    box-shadow:
+            0 0 0 4px rgba(255, 255, 255, 0.10);
+
+    animation: tutorialPulse 1.8s infinite;
+}
+
+@keyframes tutorialPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.015); }
+    100% { transform: scale(1); }
+}
+
+.tutorial-box {
+    position: fixed;
+    z-index: 1000;
+
+    width: calc(100vw - 32px);
+    max-width: 320px;
+
+    background: var(--bg);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-md);
+
+    padding: 16px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+
+    pointer-events: auto;
+}
+
+.tutorial-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.tutorial-text {
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-sec);
+}
+
+.tutorial-btn {
+    margin-top: 14px;
+    width: 100%;
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    padding: 10px 12px;
+
+    background: var(--accent);
+    color: white;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    cursor: pointer;
+}
+
+.tutorial-btn:active {
+    transform: scale(0.985);
+}
+
+.tutorial-wait {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-ter);
+}
+
+.tutorial-finish {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-sec);
+}
+
+.tutorial-finish-btn {
+    margin-top: 14px;
+    width: 100%;
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    padding: 10px 12px;
+
+    background: var(--accent);
+    color: white;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    cursor: pointer;
+}
+
+.tutorial-finish-btn:active {
+    transform: scale(0.985);
+}

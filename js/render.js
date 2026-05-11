@@ -200,6 +200,109 @@ const Render = (() => {
         document.getElementById('conclusions').value = data.conclusions || '';
     }
 
+    function log(dateKey, data) {
+        const container = document.getElementById('logList');
+        container.innerHTML = '';
+
+        const entries = [];
+
+        (data.glucose || []).forEach(p => {
+            entries.push({
+                h: p.h,
+                type: 'glucose',
+                val: p.g,
+            });
+        });
+
+        (data.insulin || []).forEach(p => {
+            if (p.b && p.b > 0) {
+                entries.push({
+                    h: p.h,
+                    type: 'bolus',
+                    val: p.b,
+                });
+            }
+
+            if (p.ba && p.ba > 0) {
+                entries.push({
+                    h: p.h,
+                    type: 'basal',
+                    val: p.ba,
+                });
+            }
+        });
+
+        entries.sort((a, b) => a.h - b.h);
+
+        if (entries.length === 0) {
+            container.innerHTML = `
+            <div class="log-empty-card">
+                <div class="log-empty-icon">◌</div>
+                <div class="log-empty-title">Пока нет записей</div>
+                <div class="log-empty-sub">
+                    Добавьте измерение глюкозы или инсулин
+                </div>
+            </div>
+        `;
+            return;
+        }
+
+        entries.forEach(e => {
+            const time = floatToTime(e.h);
+
+            let icon = '';
+            let label = '';
+            let value = '';
+            let badge = '';
+
+            if (e.type === 'glucose') {
+                icon = '🩸';
+                label = 'Глюкоза';
+                value = `${e.val.toFixed(1)} ммоль/л`;
+
+                if (e.val < 4) badge = 'low';
+                else if (e.val > 10) badge = 'high';
+                else badge = 'normal';
+            }
+
+            if (e.type === 'bolus') {
+                icon = '💉';
+                label = 'Болюс';
+                value = `${e.val} ед.`;
+                badge = 'insulin';
+            }
+
+            if (e.type === 'basal') {
+                icon = '💊';
+                label = 'Базальный';
+                value = `${e.val} ед.`;
+                badge = 'basal';
+            }
+
+            const row = document.createElement('div');
+            row.className = `log-card ${badge}`;
+
+            row.innerHTML = `
+            <div class="log-time-col">
+                <div class="log-time">${time}</div>
+            </div>
+
+            <div class="log-card-body">
+                <div class="log-card-top">
+                    <div class="log-icon">${icon}</div>
+
+                    <div class="log-main">
+                        <div class="log-label">${label}</div>
+                        <div class="log-value">${value}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            container.appendChild(row);
+        });
+    }
+
     function all(dateKey) {
         const data = Storage.getDay(dateKey);
         glucose(dateKey, data);
@@ -211,6 +314,7 @@ const Render = (() => {
         sleep(data);
         stress(dateKey, data);
         notes(data);
+        log(dateKey, data);
     }
 
     return { all, glucose, calcSleepDuration, timeToFloat, floatToTime };
