@@ -61,20 +61,17 @@ const Render = (() => {
                     </div>
                 </div>
 
-                <textarea
-                    class="meal-food"
+                <textarea class="meal-food"
                     placeholder="Приём пищи"
                     data-meal="${m.key}"
                     data-field="food">${d.food || ''}</textarea>
 
                 <div class="meal-fields">
-                    <textarea
-                        placeholder="Физ. ощущения"
+                    <textarea placeholder="Физ. ощущения"
                         data-meal="${m.key}"
                         data-field="phys">${d.phys || ''}</textarea>
 
-                    <textarea
-                        placeholder="Эмоции"
+                    <textarea placeholder="Эмоции"
                         data-meal="${m.key}"
                         data-field="emo">${d.emo || ''}</textarea>
                 </div>
@@ -104,7 +101,6 @@ const Render = (() => {
         });
 
         container.querySelectorAll('textarea').forEach(el => {
-
             autoResize(el);
 
             el.addEventListener('input', () => {
@@ -220,9 +216,25 @@ const Render = (() => {
         });
     }
 
-    function notes(data) {
-        document.getElementById('notes').value = data.notes || '';
-        document.getElementById('conclusions').value = data.conclusions || '';
+    function notes(dateKey, data) {
+        const notesEl = document.querySelector('textarea.notes');
+        const concEl = document.getElementById('conclusions');
+
+        notesEl.value = data.notes || '';
+        concEl.value = data.conclusions || '';
+
+        autoResize(notesEl);
+        autoResize(concEl);
+
+        notesEl.addEventListener('input', () => {
+            autoResize(notesEl);
+            Storage.setField(dateKey, 'notes', notesEl.value);
+        });
+
+        concEl.addEventListener('input', () => {
+            autoResize(concEl);
+            Storage.setField(dateKey, 'conclusions', concEl.value);
+        });
     }
 
     function log(dateKey, data) {
@@ -298,7 +310,7 @@ const Render = (() => {
         stool(dateKey, data);
         sleep(data);
         stress(dateKey, data);
-        notes(data);
+        notes(dateKey, data);
         log(dateKey, data);
     }
 

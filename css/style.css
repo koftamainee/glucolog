@@ -567,6 +567,7 @@ textarea.notes {
     background: var(--bg-sec);
     resize: none;
     line-height: 1.5;
+    overflow: hidden;
 }
 
 textarea.notes::placeholder {
