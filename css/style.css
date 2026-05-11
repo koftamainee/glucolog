@@ -316,10 +316,13 @@ canvas#glucoseChart {
     display: flex;
     gap: 8px;
     margin-top: 8px;
+    width: 100%;
 }
 
 .meal-fields input {
     flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
     padding: 8px 10px;
     border: 0.5px solid var(--border-med);
     border-radius: var(--radius-sm);
@@ -330,6 +333,7 @@ canvas#glucoseChart {
 }
 
 .meal-card {
+    box-sizing: border-box;
     background: var(--bg-sec);
     border-radius: var(--radius-md);
     padding: 10px 12px;
