@@ -79,10 +79,14 @@
     <section class="section" id="sec-sleep">
       <div class="section-title">Сон</div>
       <div class="sleep-row">
-        <label for="sleepStart">Лёг</label>
-        <input type="time" id="sleepStart" aria-label="Время отхода ко сну">
-        <label for="sleepEnd">Встал</label>
-        <input type="time" id="sleepEnd" aria-label="Время подъёма">
+        <div class="sleep-pair">
+          <label for="sleepStart">Лёг</label>
+          <input type="time" id="sleepStart" aria-label="Время отхода ко сну">
+        </div>
+        <div class="sleep-pair">
+          <label for="sleepEnd">Встал</label>
+          <input type="time" id="sleepEnd" aria-label="Время подъёма">
+        </div>
         <span class="sleep-duration" id="sleepDuration"></span>
       </div>
     </section>
