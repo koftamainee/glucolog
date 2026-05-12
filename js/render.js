@@ -243,6 +243,47 @@ const Render = (() => {
         });
     }
 
+    function confirmDelete(label, onConfirm) {
+        const existing = document.getElementById('deleteConfirmOverlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'deleteConfirmOverlay';
+        overlay.className = 'delete-confirm-overlay';
+
+        overlay.innerHTML = `
+            <div class="delete-confirm-box">
+                <div class="delete-confirm-title">Удалить запись?</div>
+                <div class="delete-confirm-text">${label}</div>
+                <div class="delete-confirm-actions">
+                    <button class="delete-confirm-cancel">Отмена</button>
+                    <button class="delete-confirm-ok">Удалить</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(() => overlay.classList.add('visible'));
+
+        function close() {
+            overlay.classList.remove('visible');
+            setTimeout(() => overlay.remove(), 180);
+        }
+
+        overlay.querySelector('.delete-confirm-cancel').addEventListener('click', close);
+        overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+        overlay.querySelector('.delete-confirm-ok').addEventListener('click', () => {
+            close();
+            onConfirm();
+        });
+
+        document.addEventListener('keydown', function onKey(e) {
+            if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); }
+        });
+    }
+
     function log(dateKey, data) {
         const container = document.getElementById('logList');
         container.innerHTML = '';
@@ -300,7 +341,19 @@ const Render = (() => {
             row.innerHTML = `
                 <div class="log-time">${time}</div>
                 <div>${icon} ${label}: ${value}</div>
+                <button class="log-delete-btn" aria-label="Удалить запись">×</button>
             `;
+
+            row.querySelector('.log-delete-btn').addEventListener('click', () => {
+                confirmDelete(`${icon} ${label}: ${value} · ${time}`, () => {
+                    if (e.type === 'glucose') Storage.removeGlucosePoint(dateKey, e.h);
+                    if (e.type === 'bolus')   Storage.removeInsulinPoint(dateKey, e.h, 'bolus');
+                    if (e.type === 'basal')   Storage.removeInsulinPoint(dateKey, e.h, 'basal');
+                    const fresh = Storage.getDay(dateKey);
+                    log(dateKey, fresh);
+                    glucose(dateKey, fresh);
+                });
+            });
 
             container.appendChild(row);
         });

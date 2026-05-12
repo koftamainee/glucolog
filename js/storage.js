@@ -79,5 +79,27 @@ const Storage = (() => {
         return db[dateKey][field];
     }
 
-    return { getDay, setField, setMealField, addGlucosePoint, addInsulinPoint, toggleArrayItem };
+    function removeGlucosePoint(dateKey, hourFloat) {
+        const db = loadAll();
+        if (!db[dateKey]?.glucose) return;
+        db[dateKey].glucose = db[dateKey].glucose.filter(p => Math.abs(p.h - hourFloat) >= 0.001);
+        saveAll(db);
+    }
+
+    function removeInsulinPoint(dateKey, hourFloat, type) {
+        const db = loadAll();
+        if (!db[dateKey]?.insulin) return;
+        db[dateKey].insulin = db[dateKey].insulin
+            .map(p => {
+                if (Math.abs(p.h - hourFloat) >= 0.001) return p;
+                const updated = { ...p };
+                if (type === 'bolus') updated.b = 0;
+                if (type === 'basal') updated.ba = 0;
+                return updated;
+            })
+            .filter(p => (p.b || 0) > 0 || (p.ba || 0) > 0);
+        saveAll(db);
+    }
+
+    return { getDay, setField, setMealField, addGlucosePoint, addInsulinPoint, toggleArrayItem, removeGlucosePoint, removeInsulinPoint };
 })();
