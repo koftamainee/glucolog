@@ -21,3 +21,18 @@
     color: var(--text-ter);
     margin-bottom: 10px;
 }
+
+.footer-privacy {
+    text-align: center;
+    padding: 12px 16px 24px;
+    font-size: 11px;
+}
+
+.footer-privacy a {
+    color: var(--text-ter);
+    text-decoration: none;
+}
+
+.footer-privacy a:hover {
+    color: var(--text-sec);
+}
