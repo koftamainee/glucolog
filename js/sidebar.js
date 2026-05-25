@@ -161,7 +161,11 @@ const Sidebar = (() => {
                 .addEventListener('click', () => {
                     close();
                     setTimeout(() => {
-                        Drive.link().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
+                        Drive.link().then(() => {
+                            rebuild();
+                            open(onImportCallback);
+                            if (onImportCallback) onImportCallback();
+                        });
                     }, 300);
                 });
         }
