@@ -20,6 +20,7 @@ const Sidebar = (() => {
         };
 
         const driveLinked = Drive.isLinked();
+        const driveEmail = Drive.getEmail();
 
         drawer.innerHTML = `
             <div class="sidebar-header">
@@ -57,6 +58,7 @@ const Sidebar = (() => {
                     <span class="sidebar-drive-name">☁️ Google Drive</span>
                     <span class="sidebar-drive-badge">● Подключён</span>
                 </div>
+                ${driveEmail ? '<div class="sidebar-drive-email">' + driveEmail + '</div>' : ''}
                 <div class="sidebar-drive-time">
                     Резервная копия: <span id="driveRelativeTime">${Drive.getRelativeTime() || '-'}</span>
                 </div>
@@ -151,20 +153,16 @@ const Sidebar = (() => {
 
             drawer.querySelector('#sidebarDriveChange')
                 .addEventListener('click', () => {
+                    stopDriveTimer();
                     close();
-                    setTimeout(() => {
-                        Drive.changeAccount().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
-                    }, 300);
+                    setTimeout(() => Drive.changeAccount(), 300);
                 });
         } else {
             drawer.querySelector('#sidebarDriveLink')
                 .addEventListener('click', () => {
-                    Drive.link().then(() => {
-                        close();
-                        rebuild();
-                        open(onImportCallback);
-                        if (onImportCallback) onImportCallback();
-                    });
+                    stopDriveTimer();
+                    close();
+                    setTimeout(() => Drive.link(), 300);
                 });
         }
 
