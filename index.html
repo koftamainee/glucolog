@@ -51,9 +51,33 @@
 
     <link rel="manifest" href="site.webmanifest">
 
-    <link rel="stylesheet" href="css/style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/chart.css">
+    <link rel="stylesheet" href="css/insulin.css">
+    <link rel="stylesheet" href="css/meals.css">
+    <link rel="stylesheet" href="css/water.css">
+    <link rel="stylesheet" href="css/sport.css">
+    <link rel="stylesheet" href="css/stool.css">
+    <link rel="stylesheet" href="css/sleep.css">
+    <link rel="stylesheet" href="css/notes.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/journal.css">
+    <link rel="stylesheet" href="css/tutorial.css">
+    <link rel="stylesheet" href="css/journal-delete.css">
+    <link rel="stylesheet" href="css/offline.css">
 </head>
 <body>
+
+<div id="offlineBanner" class="offline-banner">Режим офлайн</div>
+
 <div class="app">
 
     <header class="header">
@@ -78,6 +102,7 @@
         <div class="chart-xlabels">
             <span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
         </div>
+        <div class="glucose-stats" id="glucoseStats"></div>
         <div class="add-entry">
             <input type="number" id="glucoseVal" placeholder="Глюкоза ммоль/л" min="1" max="30" step="0.1" aria-label="Значение глюкозы">
             <input type="time" id="glucoseTime" aria-label="Время измерения глюкозы">
@@ -176,6 +201,7 @@
 <script src="js/calendar.js"></script>
 <script src="js/sidebar.js"></script>
 <script src="js/tutorial.js"></script>
+<script src="js/drive.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -26,6 +26,7 @@
     }
 
     function renderAll() {
+        Render.__day = currentDay;
         document.getElementById('dateLabel').textContent = formatDateLabel(currentDay);
         Render.all(currentDay);
     }
@@ -133,13 +134,37 @@
         });
     }
 
+    function initDarkMode() {
+        const saved = localStorage.getItem('glucolog_dark');
+        if (saved === 'dark' || saved === 'light') {
+            document.documentElement.setAttribute('data-theme', saved);
+        }
+    }
+
     function init() {
+        initDarkMode();
+        updateOnlineStatus();
         wireEvents();
         renderAll();
 
-        Tutorial.start()
+        Tutorial.start();
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    function registerSW() {
+        if (!('serviceWorker' in navigator)) return;
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
+    function updateOnlineStatus() {
+        const banner = document.getElementById('offlineBanner');
+        if (!banner) return;
+        banner.classList.toggle('visible', !navigator.onLine);
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    registerSW();
+    init();
 
 })();

@@ -1,0 +1,22 @@
+.stool-grid {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.stool-opt {
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 100px;
+    border: 0.5px solid var(--border);
+    color: var(--text-sec);
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s, color 0.1s;
+    user-select: none;
+}
+
+.stool-opt.active {
+    background: var(--bg-ter);
+    color: var(--text);
+    border-color: var(--border-med);
+}

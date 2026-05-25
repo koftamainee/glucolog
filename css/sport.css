@@ -1,0 +1,39 @@
+.toggle-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.toggle-btn {
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 0.5px solid var(--border-med);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-sec);
+    background: none;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.toggle-btn.active {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: transparent;
+}
+
+.steps-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.steps-row input {
+    width: 120px;
+}
+
+.steps-label {
+    font-size: 13px;
+    color: var(--text-ter);
+}

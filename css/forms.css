@@ -1,0 +1,50 @@
+input[type="number"],
+input[type="time"],
+select,
+textarea {
+    background: var(--bg);
+    color: var(--text);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 10px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    input[type="number"],
+    input[type="time"],
+    select,
+    textarea {
+        background: #242422;
+        color: #f0efe9;
+    }
+}
+
+input[type="number"]:focus,
+input[type="time"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--accent);
+}
+
+.btn {
+    padding: 8px 14px;
+    background: none;
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--text);
+    white-space: nowrap;
+    transition: background 0.1s;
+}
+
+.btn:active {
+    background: var(--bg-sec);
+}

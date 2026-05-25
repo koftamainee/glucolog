@@ -1,0 +1,110 @@
+.tutorial-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.tutorial-highlight {
+    position: relative;
+    z-index: 501;
+    border-radius: 12px;
+
+    box-shadow:
+            0 0 0 4px rgba(255, 255, 255, 0.10);
+
+    animation: tutorialPulse 1.8s infinite;
+}
+
+@keyframes tutorialPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.015); }
+    100% { transform: scale(1); }
+}
+
+.tutorial-box {
+    position: fixed;
+    z-index: 1000;
+
+    width: calc(100vw - 32px);
+    max-width: 320px;
+
+    background: var(--bg);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-md);
+
+    padding: 16px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+
+    pointer-events: auto;
+}
+
+.tutorial-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.tutorial-text {
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-sec);
+}
+
+.tutorial-btn {
+    margin-top: 14px;
+    width: 100%;
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    padding: 10px 12px;
+
+    background: var(--accent);
+    color: white;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    cursor: pointer;
+}
+
+.tutorial-btn:active {
+    transform: scale(0.985);
+}
+
+.tutorial-wait {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-ter);
+}
+
+.tutorial-finish {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-sec);
+}
+
+.tutorial-finish-btn {
+    margin-top: 14px;
+    width: 100%;
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    padding: 10px 12px;
+
+    background: var(--accent);
+    color: white;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    cursor: pointer;
+}
+
+.tutorial-finish-btn:active {
+    transform: scale(0.985);
+}

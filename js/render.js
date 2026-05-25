@@ -35,6 +35,55 @@ const Render = (() => {
     function glucose(dateKey, data) {
         const canvas = document.getElementById('glucoseChart');
         GlucoseChart.draw(canvas, data.glucose || [], data.insulin || []);
+        glucoseStats(dateKey, data);
+    }
+
+    function glucoseStats(dateKey, data) {
+        const el = document.getElementById('glucoseStats');
+        if (!el) return;
+        const points = data.glucose || [];
+        if (!points.length) { el.innerHTML = ''; return; }
+
+        const vals = points.map(p => p.g);
+        const n = vals.length;
+        const min = Math.min(...vals);
+        const max = Math.max(...vals);
+        const avg = vals.reduce((a, b) => a + b, 0) / n;
+        const sd = Math.sqrt(vals.reduce((s, v) => s + (v - avg) ** 2, 0) / n);
+        const hypo = vals.filter(v => v < 4).length;
+        const hyper = vals.filter(v => v > 10).length;
+
+        function fmt(v) { return v.toFixed(1); }
+
+        const parts = [
+            `<span>n=${n}</span>`,
+            `<span>\u2193${fmt(min)} \u2191${fmt(max)}</span>`,
+            `<span>\u00D8${fmt(avg)}</span>`,
+            `<span>SD=${fmt(sd)}</span>`,
+        ];
+        if (hypo) parts.push(`<span class="stat-hypo">\u2193${hypo}</span>`);
+        if (hyper) parts.push(`<span class="stat-hyper">\u2191${hyper}</span>`);
+
+        const prevKey = shiftDateKey(dateKey, -1);
+        const prevData = Storage.getDay(prevKey);
+        const prevPoints = prevData.glucose || [];
+        if (prevPoints.length) {
+            const prevAvg = prevPoints.reduce((s, p) => s + p.g, 0) / prevPoints.length;
+            const diff = avg - prevAvg;
+            let arrow = '\u2192';
+            if (diff > 0.3) arrow = '\u2191';
+            else if (diff < -0.3) arrow = '\u2193';
+            parts.push(`<span class="stat-trend">${arrow}</span>`);
+        }
+
+        el.innerHTML = parts.join('');
+    }
+
+    function shiftDateKey(key, delta) {
+        const [y, m, d] = key.split('-');
+        const dt = new Date(+y, +m - 1, +d);
+        dt.setDate(dt.getDate() + delta);
+        return dt.toISOString().slice(0, 10);
     }
 
     function meals(dateKey, data) {

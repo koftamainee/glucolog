@@ -1,0 +1,18 @@
+.offline-banner {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background: #dc3535;
+    color: #fff;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    letter-spacing: 0.03em;
+    transform: translateY(-100%);
+    transition: transform 0.25s ease;
+}
+
+.offline-banner.visible {
+    transform: translateY(0);
+}

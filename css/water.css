@@ -1,0 +1,26 @@
+.water-track {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.water-glass {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-med);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text-ter);
+    transition: background 0.1s, border-color 0.1s, color 0.1s;
+    user-select: none;
+}
+
+.water-glass.filled {
+    background: var(--info-bg);
+    border-color: transparent;
+    color: var(--info-text);
+}
