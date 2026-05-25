@@ -189,6 +189,8 @@ const Sidebar = (() => {
                         const data = JSON.parse(e.target.result);
                         if (typeof data !== 'object' || Array.isArray(data)) throw new Error();
                         localStorage.setItem('glucolog', JSON.stringify(data));
+                        Drive.touchLocalModified();
+                        Drive.scheduleAutoBackup();
                         showStatus('Импорт выполнен', true);
                         if (onImportCallback) onImportCallback();
                     } catch {
@@ -207,6 +209,8 @@ const Sidebar = (() => {
                 reader.onload = e => {
                     try {
                         const result = importCSV(e.target.result);
+                        Drive.touchLocalModified();
+                        Drive.scheduleAutoBackup();
                         showStatus(`Импортировано ${result} дней`, true);
                         if (onImportCallback) onImportCallback();
                     } catch {
