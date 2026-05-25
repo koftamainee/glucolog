@@ -159,14 +159,12 @@ const Sidebar = (() => {
         } else {
             drawer.querySelector('#sidebarDriveLink')
                 .addEventListener('click', () => {
-                    close();
-                    setTimeout(() => {
-                        Drive.link().then(() => {
-                            rebuild();
-                            open(onImportCallback);
-                            if (onImportCallback) onImportCallback();
-                        });
-                    }, 300);
+                    Drive.link().then(() => {
+                        close();
+                        rebuild();
+                        open(onImportCallback);
+                        if (onImportCallback) onImportCallback();
+                    });
                 });
         }
 
