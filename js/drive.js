@@ -233,38 +233,46 @@ const Drive = (() => {
         const driveNewer = driveTime > backupTime;
         const localNewer = localModified > backupTime;
 
+        let choice;
         if (!backupTime || (!driveNewer && !localNewer)) {
-            try {
-                await updateFile(file.id, getLocalData());
-                const now = new Date().toISOString();
-                localStorage.setItem('glucolog_drive_backup_at', now);
-                touchLocalModified();
-                showDialog('Готово', 'Резервная копия обновлена на Google Drive');
-            } catch (e) {
-                showDialog('Ошибка', 'Не удалось обновить копию: ' + e.message);
-            }
-            return;
-        }
-
-        if (driveNewer && localNewer) {
-            showChoice(
+            choice = await showChoicePromise(
+                'Найдена резервная копия',
+                'На Google Drive уже есть резервная копия. Какие данные использовать?',
+                'С Drive (' + new Date(driveTime).toLocaleString('ru') + ')',
+                'Локальные'
+            );
+        } else if (driveNewer && localNewer) {
+            choice = await showChoicePromise(
                 'Конфликт версий',
-                'Данные изменились и локально, и на Google Drive. Что делать?',
-                () => restoreFromDrive(file.id),
-                () => backupToDrive(file.id)
+                'Данные изменились и локально, и на Google Drive.',
+                'С Drive',
+                'Локальные'
             );
         } else if (driveNewer) {
-            showChoice(
+            choice = await showChoicePromise(
                 'Найдена более новая копия',
                 'На Google Drive более свежие данные. Загрузить их?',
-                () => restoreFromDrive(file.id),
-                null
+                'Да, с Drive',
+                'Нет, локальные'
             );
         } else {
+            choice = 'local';
+        }
+
+        if (choice === 'drive') {
+            try {
+                await restoreFromDrive(file.id);
+                showDialog('Готово', 'Данные восстановлены с Google Drive');
+                if (onImportCallback) onImportCallback();
+            } catch (e) {
+                showDialog('Ошибка', 'Не удалось загрузить данные с Drive: ' + e.message);
+            }
+        } else if (choice === 'local') {
             try {
                 await backupToDrive(file.id);
+                showDialog('Готово', 'Локальные данные сохранены на Google Drive');
             } catch (e) {
-                showDialog('Ошибка', 'Не удалось обновить копию: ' + e.message);
+                showDialog('Ошибка', 'Не удалось сохранить копию: ' + e.message);
             }
         }
     }
@@ -401,6 +409,45 @@ const Drive = (() => {
 
         document.addEventListener('keydown', function onKey(e) {
             if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); }
+        });
+    }
+
+    function showChoicePromise(title, message, driveLabel, localLabel) {
+        return new Promise(resolve => {
+            const existing = document.getElementById('driveChoice');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'driveChoice';
+            overlay.className = 'delete-confirm-overlay';
+
+            overlay.innerHTML =
+                '<div class="delete-confirm-box">' +
+                '<div class="delete-confirm-title">' + title + '</div>' +
+                '<div class="delete-confirm-text">' + message + '</div>' +
+                '<div class="delete-confirm-actions">' +
+                '<button class="delete-confirm-ok" id="driveChoiceDrive">' + driveLabel + '</button>' +
+                '<button class="delete-confirm-cancel" id="driveChoiceLocal">' + localLabel + '</button>' +
+                '<button class="delete-confirm-cancel" id="driveChoiceCancel">Отмена</button>' +
+                '</div>' +
+                '</div>';
+
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+
+            function close() {
+                overlay.classList.remove('visible');
+                setTimeout(() => overlay.remove(), 180);
+            }
+
+            overlay.querySelector('#driveChoiceDrive').addEventListener('click', () => { close(); resolve('drive'); });
+            overlay.querySelector('#driveChoiceLocal').addEventListener('click', () => { close(); resolve('local'); });
+            overlay.querySelector('#driveChoiceCancel').addEventListener('click', () => { close(); resolve('cancel'); });
+            overlay.addEventListener('click', e => { if (e.target === overlay) { close(); resolve('cancel'); } });
+
+            document.addEventListener('keydown', function onKey(e) {
+                if (e.key === 'Escape') { close(); resolve('cancel'); document.removeEventListener('keydown', onKey); }
+            });
         });
     }
 
