@@ -8,6 +8,8 @@ const Drive = (() => {
     let tokenClient = null;
     let _pendingResolve = null;
     let _pendingReject = null;
+    let _cachedToken = null;
+    let _tokenExpiresAt = 0;
 
     function waitForGis() {
         return new Promise(resolve => {
@@ -35,6 +37,10 @@ const Drive = (() => {
                 if (response.error) {
                     if (_pendingReject) _pendingReject(new Error(response.error_description || response.error));
                 } else {
+                    _cachedToken = response.access_token;
+                    if (response.expires_in) {
+                        _tokenExpiresAt = Date.now() + response.expires_in * 1000 - 60000;
+                    }
                     if (response.id_token) {
                         try {
                             const info = google.accounts.oauth2.decodeJwt(response.id_token);
@@ -63,6 +69,9 @@ const Drive = (() => {
     }
 
     function getToken(forcePrompt) {
+        if (!forcePrompt && _cachedToken && Date.now() < _tokenExpiresAt) {
+            return Promise.resolve(_cachedToken);
+        }
         return new Promise((resolve, reject) => {
             if (!initTokenClient()) {
                 reject(new Error('Google Identity Services not loaded'));
@@ -75,6 +84,9 @@ const Drive = (() => {
     }
 
     function getTokenSilent() {
+        if (_cachedToken && Date.now() < _tokenExpiresAt) {
+            return Promise.resolve(_cachedToken);
+        }
         return new Promise((resolve, reject) => {
             if (!initTokenClient()) {
                 reject(new Error('Google Identity Services not loaded'));
@@ -304,6 +316,8 @@ const Drive = (() => {
     }
 
     function unlink() {
+        _cachedToken = null;
+        _tokenExpiresAt = 0;
         localStorage.removeItem('glucolog_drive_file_id');
         localStorage.removeItem('glucolog_drive_backup_at');
         localStorage.removeItem('glucolog_drive_email');
