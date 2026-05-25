@@ -56,6 +56,129 @@ const Drive = (() => {
         return true;
     }
 
+    const REDIRECT_URI = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+
+    function isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    function linkRedirect() {
+        sessionStorage.setItem('glucolog_drive_redirect', 'link');
+        sessionStorage.setItem('glucolog_drive_just_linked', '1');
+        waitForGis().then(() => {
+            google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPE,
+                ux_mode: 'redirect',
+                redirect_uri: REDIRECT_URI,
+                callback: () => {},
+            }).requestAccessToken({ prompt: 'consent' });
+        });
+    }
+
+    function initRedirectHandler() {
+        const pending = sessionStorage.getItem('glucolog_drive_redirect');
+        if (!pending) return;
+        waitForGis().then(() => {
+            google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPE,
+                ux_mode: 'redirect',
+                redirect_uri: REDIRECT_URI,
+                callback: response => {
+                    sessionStorage.removeItem('glucolog_drive_redirect');
+                    if (response.error) {
+                        sessionStorage.removeItem('glucolog_drive_just_linked');
+                        showDialog('Ошибка', 'Не удалось авторизоваться: ' + (response.error_description || response.error));
+                        return;
+                    }
+                    _cachedToken = response.access_token;
+                    if (response.expires_in) {
+                        _tokenExpiresAt = Date.now() + response.expires_in * 1000 - 60000;
+                    }
+                    if (response.id_token) {
+                        try {
+                            const info = google.accounts.oauth2.decodeJwt(response.id_token);
+                            if (info && info.email) localStorage.setItem('glucolog_drive_email', info.email);
+                        } catch (e) {}
+                    }
+                    completeLinkAfterRedirect();
+                },
+            });
+        });
+    }
+
+    async function completeLinkAfterRedirect() {
+        let file;
+        try {
+            file = await findFile();
+        } catch (e) {
+            showDialog('Ошибка', 'Не удалось проверить Google Drive: ' + e.message);
+            return;
+        }
+
+        if (!file) {
+            try {
+                const id = await createFile(getLocalData());
+                localStorage.setItem('glucolog_drive_file_id', id);
+                localStorage.setItem('glucolog_drive_backup_at', new Date().toISOString());
+                touchLocalModified();
+            } catch (e) {
+                showDialog('Ошибка', 'Не удалось создать копию: ' + e.message);
+            }
+            return;
+        }
+
+        localStorage.setItem('glucolog_drive_file_id', file.id);
+
+        const driveTime = file.modifiedTime || '';
+        const localModified = getLocalModified();
+        const backupTime = getBackupTime();
+        const driveNewer = driveTime > backupTime;
+        const localNewer = localModified > backupTime;
+
+        let choice;
+        if (!backupTime || (!driveNewer && !localNewer)) {
+            choice = await showChoicePromise(
+                'Найдена резервная копия',
+                'На Google Drive уже есть резервная копия. Какие данные использовать?',
+                'С Drive (' + new Date(driveTime).toLocaleString('ru') + ')',
+                'Локальные'
+            );
+        } else if (driveNewer && localNewer) {
+            choice = await showChoicePromise(
+                'Конфликт версий',
+                'Данные изменились и локально, и на Google Drive.',
+                'С Drive',
+                'Локальные'
+            );
+        } else if (driveNewer) {
+            choice = await showChoicePromise(
+                'Найдена более новая копия',
+                'На Google Drive более свежие данные. Загрузить их?',
+                'Да, с Drive',
+                'Нет, локальные'
+            );
+        } else {
+            choice = 'local';
+        }
+
+        if (choice === 'drive') {
+            try {
+                await restoreFromDrive(file.id);
+                if (onImportCallback) onImportCallback();
+            } catch (e) {
+                showDialog('Ошибка', 'Не удалось загрузить данные с Drive: ' + e.message);
+            }
+        } else if (choice === 'local') {
+            try {
+                await backupToDrive(file.id);
+            } catch (e) {
+                showDialog('Ошибка', 'Не удалось сохранить копию: ' + e.message);
+            }
+        }
+    }
+
     function isLinked() {
         return !!localStorage.getItem('glucolog_drive_file_id');
     }
@@ -196,6 +319,10 @@ const Drive = (() => {
     }
 
     async function link() {
+        if (isStandalone()) {
+            linkRedirect();
+            await new Promise(() => {});
+        }
         try {
             await getToken(true);
         } catch (e) {
@@ -506,6 +633,7 @@ const Drive = (() => {
         onImportCallback = cb;
     }
 
+    initRedirectHandler();
     touchLocalModified();
 
     return { link, backup, restore, unlink, isLinked, getBackupTime, getRelativeTime, getEmail, changeAccount, scheduleAutoBackup, setOnImport, touchLocalModified };
