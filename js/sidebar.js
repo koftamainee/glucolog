@@ -153,16 +153,18 @@ const Sidebar = (() => {
 
             drawer.querySelector('#sidebarDriveChange')
                 .addEventListener('click', () => {
-                    stopDriveTimer();
                     close();
-                    setTimeout(() => Drive.changeAccount(), 300);
+                    setTimeout(() => {
+                        Drive.changeAccount().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
+                    }, 300);
                 });
         } else {
             drawer.querySelector('#sidebarDriveLink')
                 .addEventListener('click', () => {
-                    stopDriveTimer();
                     close();
-                    setTimeout(() => Drive.link(), 300);
+                    setTimeout(() => {
+                        Drive.link().then(() => { rebuild(); open(onImportCallback); if (onImportCallback) onImportCallback(); });
+                    }, 300);
                 });
         }
 

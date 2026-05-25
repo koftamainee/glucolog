@@ -4,10 +4,8 @@ const Drive = (() => {
     const FILE_NAME = 'glucolog-backup.json';
     const DRIVE_API = 'https://www.googleapis.com/drive/v3';
     const UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3';
-    const REDIRECT_URI = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
-    const PENDING_KEY = 'glucolog_drive_link_pending';
 
-    let popupClient = null;
+    let tokenClient = null;
 
     function waitForGis() {
         return new Promise(resolve => {
@@ -40,35 +38,50 @@ const Drive = (() => {
     function getToken(forcePrompt) {
         return new Promise((resolve, reject) => {
             try {
-                if (!popupClient) {
+                if (!tokenClient) {
                     if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
                         reject(new Error('Google Identity Services not loaded'));
                         return;
                     }
-                    popupClient = google.accounts.oauth2.initTokenClient({
+                    tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
                         scope: SCOPE,
-                        ux_mode: 'popup',
                         callback: response => {
                             if (response.error) {
                                 reject(new Error(response.error_description || response.error));
                                 return;
                             }
+                            if (response.id_token) {
+                                try {
+                                    const info = google.accounts.oauth2.decodeJwt(response.id_token);
+                                    if (info && info.email) {
+                                        localStorage.setItem('glucolog_drive_email', info.email);
+                                    }
+                                } catch (e) {}
+                            }
                             resolve(response.access_token);
                         },
                     });
                 } else {
-                    const origCb = popupClient.callback;
-                    popupClient.callback = response => {
-                        popupClient.callback = origCb;
+                    const origCb = tokenClient.callback;
+                    tokenClient.callback = response => {
+                        tokenClient.callback = origCb;
                         if (response.error) {
                             reject(new Error(response.error_description || response.error));
                             return;
                         }
+                        if (response.id_token) {
+                            try {
+                                const info = google.accounts.oauth2.decodeJwt(response.id_token);
+                                if (info && info.email) {
+                                    localStorage.setItem('glucolog_drive_email', info.email);
+                                }
+                            } catch (e) {}
+                        }
                         resolve(response.access_token);
                     };
                 }
-                popupClient.requestAccessToken({ prompt: forcePrompt ? 'consent' : '' });
+                tokenClient.requestAccessToken({ prompt: forcePrompt ? 'consent' : '' });
             } catch (e) {
                 reject(new Error('Failed to get token: ' + e.message));
             }
@@ -172,49 +185,14 @@ const Drive = (() => {
         localStorage.setItem('glucolog_modified_at', new Date().toISOString());
     }
 
-    function link() {
-        waitForGis().then(() => {
-            sessionStorage.setItem(PENDING_KEY, 'link');
-            const client = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPE,
-                ux_mode: 'redirect',
-                redirect_uri: REDIRECT_URI,
-                callback: () => {},
-            });
-            client.requestAccessToken({ prompt: 'consent' });
-        });
-    }
+    async function link() {
+        try {
+            await getToken(true);
+        } catch (e) {
+            showDialog('Ошибка', 'Не удалось авторизоваться: ' + e.message);
+            return;
+        }
 
-    function initRedirectHandler() {
-        const pending = sessionStorage.getItem(PENDING_KEY);
-        if (!pending) return;
-
-        waitForGis().then(() => {
-            google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPE,
-                ux_mode: 'redirect',
-                redirect_uri: REDIRECT_URI,
-                callback: response => {
-                    sessionStorage.removeItem(PENDING_KEY);
-                    if (response.error) {
-                        showDialog('Ошибка', 'Не удалось авторизоваться: ' + (response.error_description || response.error));
-                        return;
-                    }
-                    try {
-                        const info = google.accounts.oauth2.decodeJwt(response.id_token);
-                        if (info && info.email) {
-                            localStorage.setItem('glucolog_drive_email', info.email);
-                        }
-                    } catch (e) {}
-                    completePendingLink();
-                },
-            });
-        });
-    }
-
-    async function completePendingLink() {
         let file;
         try {
             file = await findFile();
@@ -230,7 +208,6 @@ const Drive = (() => {
                 const now = new Date().toISOString();
                 localStorage.setItem('glucolog_drive_backup_at', now);
                 touchLocalModified();
-                sessionStorage.setItem('glucolog_drive_just_linked', '1');
                 showDialog('Готово', 'Резервная копия создана на Google Drive');
             } catch (e) {
                 showDialog('Ошибка', 'Не удалось создать копию: ' + e.message);
@@ -252,7 +229,6 @@ const Drive = (() => {
                 const now = new Date().toISOString();
                 localStorage.setItem('glucolog_drive_backup_at', now);
                 touchLocalModified();
-                sessionStorage.setItem('glucolog_drive_just_linked', '1');
                 showDialog('Готово', 'Резервная копия обновлена на Google Drive');
             } catch (e) {
                 showDialog('Ошибка', 'Не удалось обновить копию: ' + e.message);
@@ -277,7 +253,6 @@ const Drive = (() => {
         } else {
             try {
                 await backupToDrive(file.id);
-                sessionStorage.setItem('glucolog_drive_just_linked', '1');
             } catch (e) {
                 showDialog('Ошибка', 'Не удалось обновить копию: ' + e.message);
             }
@@ -464,7 +439,6 @@ const Drive = (() => {
         onImportCallback = cb;
     }
 
-    initRedirectHandler();
     touchLocalModified();
 
     return { link, backup, restore, unlink, isLinked, getBackupTime, getRelativeTime, getEmail, changeAccount, scheduleAutoBackup, setOnImport, touchLocalModified };
