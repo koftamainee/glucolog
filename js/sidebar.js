@@ -88,7 +88,7 @@ const Sidebar = (() => {
                 <span>Туториал</span>
             </button>
 
-            <a class="sidebar-item sidebar-privacy" href="privacy.html" target="_blank">
+            <a class="sidebar-item sidebar-privacy" href="https://koftamainee.github.io/glucolog/privacy.html" target="_blank">
                 <span class="sidebar-item-icon">🔒</span>
                 <span>Политика конфиденциальности</span>
             </a>
