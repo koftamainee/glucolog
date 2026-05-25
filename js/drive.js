@@ -25,12 +25,9 @@ const Drive = (() => {
         });
     }
 
-    // Initialise tokenClient as soon as GIS is ready so that
-    // requestAccessToken() is called synchronously inside the user-gesture
-    // handler — browsers block popups opened after async gaps.
     function initTokenClient() {
-        if (tokenClient) return;
-        if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return;
+        if (tokenClient) return true;
+        if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return false;
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: CLIENT_ID,
             scope: SCOPE,
@@ -50,9 +47,8 @@ const Drive = (() => {
                 _pendingReject = null;
             },
         });
+        return true;
     }
-
-    waitForGis().then(initTokenClient);
 
     function isLinked() {
         return !!localStorage.getItem('glucolog_drive_file_id');
@@ -68,8 +64,7 @@ const Drive = (() => {
 
     function getToken(forcePrompt) {
         return new Promise((resolve, reject) => {
-            initTokenClient();
-            if (!tokenClient) {
+            if (!initTokenClient()) {
                 reject(new Error('Google Identity Services not loaded'));
                 return;
             }
@@ -81,8 +76,7 @@ const Drive = (() => {
 
     function getTokenSilent() {
         return new Promise((resolve, reject) => {
-            initTokenClient();
-            if (!tokenClient) {
+            if (!initTokenClient()) {
                 reject(new Error('Google Identity Services not loaded'));
                 return;
             }
