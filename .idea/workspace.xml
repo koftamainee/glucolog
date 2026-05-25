@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0b03e650-a69b-4fa0-bc10-c39b88d89b82" name="Changes" comment="add text expanion to notes">
+    <list default="true" id="0b03e650-a69b-4fa0-bc10-c39b88d89b82" name="Changes" comment="feature: delete log entry">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/render.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/render.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/storage.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/storage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/drive.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/drive.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/sidebar.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/sidebar.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +65,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.23567.141" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.24374.125" />
       </set>
     </attachedChunks>
   </component>
@@ -81,7 +80,9 @@
       <workItem from="1778491437164" duration="4505000" />
       <workItem from="1778503438977" duration="10809000" />
       <workItem from="1778516350676" duration="93000" />
-      <workItem from="1778567803868" duration="253000" />
+      <workItem from="1778567803868" duration="1548000" />
+      <workItem from="1778570239928" duration="24000" />
+      <workItem from="1779729606491" duration="89000" />
     </task>
     <task id="LOCAL-00001" summary="add log rebuilding on adding glucose or insulin">
       <option name="closed" value="true" />
@@ -107,7 +108,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778514023786</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="feature: delete log entry">
+      <option name="closed" value="true" />
+      <created>1778568139102</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1778568139102</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -117,6 +126,7 @@
     <MESSAGE value="add log rebuilding on adding glucose or insulin" />
     <MESSAGE value="add rescaling text areas" />
     <MESSAGE value="add text expanion to notes" />
-    <option name="LAST_COMMIT_MESSAGE" value="add text expanion to notes" />
+    <MESSAGE value="feature: delete log entry" />
+    <option name="LAST_COMMIT_MESSAGE" value="feature: delete log entry" />
   </component>
 </project>

@@ -130,18 +130,12 @@ const Sidebar = (() => {
         if (driveLinked) {
             drawer.querySelector('#sidebarDriveBackup')
                 .addEventListener('click', () => {
-                    close();
-                    setTimeout(() => {
-                        Drive.backup().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
-                    }, 300);
+                    Drive.backup().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
                 });
 
             drawer.querySelector('#sidebarDriveRestore')
                 .addEventListener('click', () => {
-                    close();
-                    setTimeout(() => {
-                        Drive.restore().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
-                    }, 300);
+                    Drive.restore().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
                 });
 
             drawer.querySelector('#sidebarDriveUnlink')
@@ -153,18 +147,23 @@ const Sidebar = (() => {
 
             drawer.querySelector('#sidebarDriveChange')
                 .addEventListener('click', () => {
-                    close();
-                    setTimeout(() => {
-                        Drive.changeAccount().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
-                    }, 300);
+                    Drive.changeAccount().then(() => {
+                        rebuild();
+                        if (onImportCallback) onImportCallback();
+                    });
                 });
         } else {
             drawer.querySelector('#sidebarDriveLink')
                 .addEventListener('click', () => {
-                    close();
-                    setTimeout(() => {
-                        Drive.link().then(() => { rebuild(); open(onImportCallback); if (onImportCallback) onImportCallback(); });
-                    }, 300);
+                    // Drive.link() calls getToken() which opens the Google popup.
+                    // We must NOT close the sidebar or use setTimeout before this call —
+                    // browsers treat async gaps / popups opened after setTimeout as
+                    // popup-blocker candidates and block or show an allow/deny prompt.
+                    Drive.link().then(() => {
+                        rebuild();
+                        open(onImportCallback);
+                        if (onImportCallback) onImportCallback();
+                    });
                 });
         }
 

@@ -6,6 +6,8 @@ const Drive = (() => {
     const UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3';
 
     let tokenClient = null;
+    let _pendingResolve = null;
+    let _pendingReject = null;
 
     function waitForGis() {
         return new Promise(resolve => {
@@ -23,6 +25,35 @@ const Drive = (() => {
         });
     }
 
+    // Initialise tokenClient as soon as GIS is ready so that
+    // requestAccessToken() is called synchronously inside the user-gesture
+    // handler — browsers block popups opened after async gaps.
+    function initTokenClient() {
+        if (tokenClient) return;
+        if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return;
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPE,
+            callback: response => {
+                if (response.error) {
+                    if (_pendingReject) _pendingReject(new Error(response.error_description || response.error));
+                } else {
+                    if (response.id_token) {
+                        try {
+                            const info = google.accounts.oauth2.decodeJwt(response.id_token);
+                            if (info && info.email) localStorage.setItem('glucolog_drive_email', info.email);
+                        } catch (e) {}
+                    }
+                    if (_pendingResolve) _pendingResolve(response.access_token);
+                }
+                _pendingResolve = null;
+                _pendingReject = null;
+            },
+        });
+    }
+
+    waitForGis().then(initTokenClient);
+
     function isLinked() {
         return !!localStorage.getItem('glucolog_drive_file_id');
     }
@@ -37,54 +68,17 @@ const Drive = (() => {
 
     function getToken(forcePrompt) {
         return new Promise((resolve, reject) => {
-            try {
-                if (!tokenClient) {
-                    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-                        reject(new Error('Google Identity Services not loaded'));
-                        return;
-                    }
-                    tokenClient = google.accounts.oauth2.initTokenClient({
-                        client_id: CLIENT_ID,
-                        scope: SCOPE,
-                        callback: response => {
-                            if (response.error) {
-                                reject(new Error(response.error_description || response.error));
-                                return;
-                            }
-                            if (response.id_token) {
-                                try {
-                                    const info = google.accounts.oauth2.decodeJwt(response.id_token);
-                                    if (info && info.email) {
-                                        localStorage.setItem('glucolog_drive_email', info.email);
-                                    }
-                                } catch (e) {}
-                            }
-                            resolve(response.access_token);
-                        },
-                    });
-                } else {
-                    const origCb = tokenClient.callback;
-                    tokenClient.callback = response => {
-                        tokenClient.callback = origCb;
-                        if (response.error) {
-                            reject(new Error(response.error_description || response.error));
-                            return;
-                        }
-                        if (response.id_token) {
-                            try {
-                                const info = google.accounts.oauth2.decodeJwt(response.id_token);
-                                if (info && info.email) {
-                                    localStorage.setItem('glucolog_drive_email', info.email);
-                                }
-                            } catch (e) {}
-                        }
-                        resolve(response.access_token);
-                    };
-                }
-                tokenClient.requestAccessToken({ prompt: forcePrompt ? 'consent' : '' });
-            } catch (e) {
-                reject(new Error('Failed to get token: ' + e.message));
+            // Make sure tokenClient exists (GIS may have loaded after our waitForGis call)
+            initTokenClient();
+            if (!tokenClient) {
+                reject(new Error('Google Identity Services not loaded'));
+                return;
             }
+            _pendingResolve = resolve;
+            _pendingReject = reject;
+            // requestAccessToken must be called synchronously inside a user-gesture handler.
+            // forcePrompt='consent' lets the user pick an account even if already authed.
+            tokenClient.requestAccessToken({ prompt: forcePrompt ? 'consent' : '' });
         });
     }
 
