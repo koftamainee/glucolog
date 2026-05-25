@@ -33,8 +33,12 @@ const Drive = (() => {
 
     function getToken(forcePrompt) {
         return new Promise((resolve, reject) => {
-            if (!tokenClient) {
-                try {
+            try {
+                if (!tokenClient) {
+                    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+                        reject(new Error('Google Identity Services not loaded'));
+                        return;
+                    }
                     tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
                         scope: SCOPE,
@@ -46,22 +50,17 @@ const Drive = (() => {
                             resolve(response.access_token);
                         },
                     });
-                } catch (e) {
-                    reject(new Error('Failed to init Google OAuth: ' + e.message));
-                    return;
+                } else {
+                    const origCb = tokenClient.callback;
+                    tokenClient.callback = response => {
+                        tokenClient.callback = origCb;
+                        if (response.error) {
+                            reject(new Error(response.error_description || response.error));
+                            return;
+                        }
+                        resolve(response.access_token);
+                    };
                 }
-            } else {
-                const origCb = tokenClient.callback;
-                tokenClient.callback = response => {
-                    tokenClient.callback = origCb;
-                    if (response.error) {
-                        reject(new Error(response.error_description || response.error));
-                        return;
-                    }
-                    resolve(response.access_token);
-                };
-            }
-            try {
                 tokenClient.requestAccessToken({ prompt: forcePrompt ? 'consent' : '' });
             } catch (e) {
                 reject(new Error('Failed to get token: ' + e.message));
@@ -167,8 +166,6 @@ const Drive = (() => {
     }
 
     async function link() {
-        await waitForGis();
-
         try {
             await getToken(true);
         } catch (e) {
@@ -393,7 +390,6 @@ const Drive = (() => {
     }
 
     async function changeAccount() {
-        await waitForGis();
         unlink();
         await link();
     }
