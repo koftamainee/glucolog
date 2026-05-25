@@ -68,7 +68,6 @@ const Drive = (() => {
 
     function getToken(forcePrompt) {
         return new Promise((resolve, reject) => {
-            // Make sure tokenClient exists (GIS may have loaded after our waitForGis call)
             initTokenClient();
             if (!tokenClient) {
                 reject(new Error('Google Identity Services not loaded'));
@@ -76,9 +75,20 @@ const Drive = (() => {
             }
             _pendingResolve = resolve;
             _pendingReject = reject;
-            // requestAccessToken must be called synchronously inside a user-gesture handler.
-            // forcePrompt='consent' lets the user pick an account even if already authed.
             tokenClient.requestAccessToken({ prompt: forcePrompt ? 'consent' : '' });
+        });
+    }
+
+    function getTokenSilent() {
+        return new Promise((resolve, reject) => {
+            initTokenClient();
+            if (!tokenClient) {
+                reject(new Error('Google Identity Services not loaded'));
+                return;
+            }
+            _pendingResolve = resolve;
+            _pendingReject = reject;
+            tokenClient.requestAccessToken({ prompt: 'none' });
         });
     }
 
@@ -419,10 +429,18 @@ const Drive = (() => {
             try {
                 const id = localStorage.getItem('glucolog_drive_file_id');
                 if (!id) return;
-                await updateFile(id, getLocalData());
+                const token = await getTokenSilent();
+                await fetch(UPLOAD_API + '/files/' + id + '?uploadType=media', {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: 'Bearer ' + token,
+                        'Content-Type': 'application/json',
+                    },
+                    body: getLocalData(),
+                });
                 localStorage.setItem('glucolog_drive_backup_at', new Date().toISOString());
             } catch (e) {
-                // silent
+                // silent — auto-backup failures are non-critical
             }
         }, 2000);
     }
