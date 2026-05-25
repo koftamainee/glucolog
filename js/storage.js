@@ -13,6 +13,7 @@ const Storage = (() => {
         try {
             localStorage.setItem(KEY, JSON.stringify(db));
             Drive.touchLocalModified();
+            Drive.scheduleAutoBackup();
         } catch (e) {
             console.warn('glucolog: failed to save', e);
         }

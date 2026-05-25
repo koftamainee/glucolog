@@ -398,6 +398,24 @@ const Drive = (() => {
         await link();
     }
 
+    let _autoBackupTimer = null;
+
+    function scheduleAutoBackup() {
+        if (!isLinked() || !navigator.onLine) return;
+        if (_autoBackupTimer) clearTimeout(_autoBackupTimer);
+        _autoBackupTimer = setTimeout(async () => {
+            _autoBackupTimer = null;
+            try {
+                const id = localStorage.getItem('glucolog_drive_file_id');
+                if (!id) return;
+                await updateFile(id, getLocalData());
+                localStorage.setItem('glucolog_drive_backup_at', new Date().toISOString());
+            } catch (e) {
+                // silent — auto-backup failures are non-critical
+            }
+        }, 2000);
+    }
+
     let onImportCallback = null;
 
     function setOnImport(cb) {
@@ -406,5 +424,5 @@ const Drive = (() => {
 
     touchLocalModified();
 
-    return { link, backup, restore, unlink, isLinked, getBackupTime, getRelativeTime, changeAccount, setOnImport, touchLocalModified };
+    return { link, backup, restore, unlink, isLinked, getBackupTime, getRelativeTime, changeAccount, scheduleAutoBackup, setOnImport, touchLocalModified };
 })();
