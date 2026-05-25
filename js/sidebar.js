@@ -88,6 +88,11 @@ const Sidebar = (() => {
                 <span>Туториал</span>
             </button>
 
+            <a class="sidebar-item sidebar-privacy" href="privacy.html" target="_blank">
+                <span class="sidebar-item-icon">🔒</span>
+                <span>Политика конфиденциальности</span>
+            </a>
+
             <input type="file" id="sidebarFileInputJSON" accept=".json" style="display:none">
             <input type="file" id="sidebarFileInputCSV" accept=".csv" style="display:none">
 

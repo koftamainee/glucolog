@@ -165,6 +165,16 @@
     background: var(--bg-ter);
 }
 
+.sidebar-privacy {
+    text-decoration: none;
+    color: var(--text);
+    font-family: inherit;
+}
+
+.sidebar-privacy:hover {
+    background: var(--bg-sec);
+}
+
 .sidebar-import-status {
     margin: 8px 16px 0;
     font-size: 12px;
