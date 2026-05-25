@@ -374,6 +374,30 @@ const Drive = (() => {
         });
     }
 
+    function getRelativeTime() {
+        const backupAt = localStorage.getItem('glucolog_drive_backup_at');
+        if (!backupAt) return '';
+        const then = new Date(backupAt);
+        const now = new Date();
+        const diffMs = now - then;
+        if (diffMs < 10000) return 'только что';
+        const sec = Math.floor(diffMs / 1000);
+        if (sec < 60) return sec + ' сек. назад';
+        const min = Math.floor(sec / 60);
+        if (min < 60) return min + ' мин. назад';
+        const h = Math.floor(min / 60);
+        if (h < 24) return h + ' ч. назад';
+        const d = Math.floor(h / 24);
+        if (d < 30) return d + ' дн. назад';
+        return then.toLocaleString('ru');
+    }
+
+    async function changeAccount() {
+        await waitForGis();
+        unlink();
+        await link();
+    }
+
     let onImportCallback = null;
 
     function setOnImport(cb) {
@@ -382,5 +406,5 @@ const Drive = (() => {
 
     touchLocalModified();
 
-    return { link, backup, restore, unlink, isLinked, getBackupTime, setOnImport, touchLocalModified };
+    return { link, backup, restore, unlink, isLinked, getBackupTime, getRelativeTime, changeAccount, setOnImport, touchLocalModified };
 })();

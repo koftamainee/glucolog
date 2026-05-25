@@ -2,6 +2,7 @@ const Sidebar = (() => {
     let overlay = null;
     let drawer = null;
     let onImportCallback = null;
+    let _driveTimer = null;
     const MEAL_KEYS = ['breakfast1', 'breakfast2', 'lunch', 'snack', 'dinner'];
 
     function build() {
@@ -19,8 +20,6 @@ const Sidebar = (() => {
         };
 
         const driveLinked = Drive.isLinked();
-        const driveTime = Drive.getBackupTime();
-        const driveTimeLabel = driveTime ? new Date(driveTime).toLocaleString('ru') : '';
 
         drawer.innerHTML = `
             <div class="sidebar-header">
@@ -52,25 +51,28 @@ const Sidebar = (() => {
 
             <div class="sidebar-section-label">Облако</div>
 
-            <button class="sidebar-item" id="sidebarDriveLink">
-                <span class="sidebar-item-icon">\u2601\uFE0F</span>
-                <span>${driveLinked ? 'Google Drive подключ\u0451н' : 'Google Drive'}</span>
-            </button>
             ${driveLinked ? `
-            <button class="sidebar-item" id="sidebarDriveBackup">
-                <span class="sidebar-item-icon">\u2191</span>
-                <span>Создать копию</span>
+            <div class="sidebar-drive-status">
+                <div class="sidebar-drive-header">
+                    <span class="sidebar-drive-name">☁️ Google Drive</span>
+                    <span class="sidebar-drive-badge">● Подключён</span>
+                </div>
+                <div class="sidebar-drive-time">
+                    Резервная копия: <span id="driveRelativeTime">${Drive.getRelativeTime() || '-'}</span>
+                </div>
+                <div class="sidebar-drive-actions">
+                    <button class="sidebar-drive-btn" id="sidebarDriveBackup">↑ Создать копию</button>
+                    <button class="sidebar-drive-btn" id="sidebarDriveRestore">↓ Восстановить</button>
+                    <button class="sidebar-drive-btn" id="sidebarDriveUnlink">✕ Отключить</button>
+                    <button class="sidebar-drive-btn" id="sidebarDriveChange">🔄 Сменить</button>
+                </div>
+            </div>
+            ` : `
+            <button class="sidebar-item" id="sidebarDriveLink">
+                <span class="sidebar-item-icon">☁️</span>
+                <span>Google Drive</span>
             </button>
-            <button class="sidebar-item" id="sidebarDriveRestore">
-                <span class="sidebar-item-icon">\u2193</span>
-                <span>Восстановить</span>
-            </button>
-            <button class="sidebar-item" id="sidebarDriveUnlink">
-                <span class="sidebar-item-icon">\u2716</span>
-                <span>Отключить</span>
-            </button>
-            ${driveTimeLabel ? '<div class="sidebar-drive-time">Последняя копия: ' + driveTimeLabel + '</div>' : ''}
-            ` : ''}
+            `}
 
             <div class="sidebar-section-label">Вид</div>
 
@@ -118,25 +120,12 @@ const Sidebar = (() => {
                 drawer.querySelector('#sidebarFileInputCSV').click();
             });
 
-        drawer.querySelector('#sidebarDriveLink')
-            .addEventListener('click', () => {
-                close();
-                setTimeout(() => {
-                    Drive.link().then(() => {
-                        rebuild();
-                        if (onImportCallback) onImportCallback();
-                    });
-                }, 300);
-            });
-
         if (driveLinked) {
             drawer.querySelector('#sidebarDriveBackup')
                 .addEventListener('click', () => {
                     close();
                     setTimeout(() => {
-                        Drive.backup().then(() => {
-                            if (onImportCallback) onImportCallback();
-                        });
+                        Drive.backup().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
                     }, 300);
                 });
 
@@ -144,16 +133,31 @@ const Sidebar = (() => {
                 .addEventListener('click', () => {
                     close();
                     setTimeout(() => {
-                        Drive.restore().then(() => {
-                            if (onImportCallback) onImportCallback();
-                        });
+                        Drive.restore().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
                     }, 300);
                 });
 
             drawer.querySelector('#sidebarDriveUnlink')
                 .addEventListener('click', () => {
+                    stopDriveTimer();
                     Drive.unlink();
                     rebuild();
+                });
+
+            drawer.querySelector('#sidebarDriveChange')
+                .addEventListener('click', () => {
+                    close();
+                    setTimeout(() => {
+                        Drive.changeAccount().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
+                    }, 300);
+                });
+        } else {
+            drawer.querySelector('#sidebarDriveLink')
+                .addEventListener('click', () => {
+                    close();
+                    setTimeout(() => {
+                        Drive.link().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
+                    }, 300);
                 });
         }
 
@@ -209,11 +213,29 @@ const Sidebar = (() => {
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') close();
         });
+
+        if (driveLinked) startDriveTimer();
+    }
+
+    function startDriveTimer() {
+        stopDriveTimer();
+        _driveTimer = setInterval(() => {
+            const el = document.getElementById('driveRelativeTime');
+            if (el) el.textContent = Drive.getRelativeTime() || '-';
+        }, 10000);
+    }
+
+    function stopDriveTimer() {
+        if (_driveTimer) {
+            clearInterval(_driveTimer);
+            _driveTimer = null;
+        }
     }
 
     function rebuild() {
         if (!overlay) return;
         const wasVisible = overlay.classList.contains('visible');
+        stopDriveTimer();
         overlay.remove();
         overlay = null;
         drawer = null;
@@ -439,6 +461,7 @@ const Sidebar = (() => {
     }
 
     function close() {
+        stopDriveTimer();
         if (!overlay) return;
         overlay.classList.remove('visible');
         drawer.classList.remove('visible');
