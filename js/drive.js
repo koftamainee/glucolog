@@ -48,18 +48,19 @@ const Drive = (() => {
                     });
                 } catch (e) {
                     reject(new Error('Failed to init Google OAuth: ' + e.message));
-                }
-                return;
-            }
-            const origCb = tokenClient.callback;
-            tokenClient.callback = response => {
-                tokenClient.callback = origCb;
-                if (response.error) {
-                    reject(new Error(response.error_description || response.error));
                     return;
                 }
-                resolve(response.access_token);
-            };
+            } else {
+                const origCb = tokenClient.callback;
+                tokenClient.callback = response => {
+                    tokenClient.callback = origCb;
+                    if (response.error) {
+                        reject(new Error(response.error_description || response.error));
+                        return;
+                    }
+                    resolve(response.access_token);
+                };
+            }
             try {
                 tokenClient.requestAccessToken({ prompt: forcePrompt ? 'consent' : '' });
             } catch (e) {
