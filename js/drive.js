@@ -206,20 +206,7 @@ const Drive = (() => {
         });
     }
 
-    function getTokenSilent() {
-        if (_cachedToken && Date.now() < _tokenExpiresAt) {
-            return Promise.resolve(_cachedToken);
-        }
-        return new Promise((resolve, reject) => {
-            if (!initTokenClient()) {
-                reject(new Error('Google Identity Services not loaded'));
-                return;
-            }
-            _pendingResolve = resolve;
-            _pendingReject = reject;
-            tokenClient.requestAccessToken({ prompt: 'none' });
-        });
-    }
+
 
     async function driveFetch(path, options) {
         const token = await getToken(false);
@@ -601,31 +588,7 @@ const Drive = (() => {
         await link();
     }
 
-    let _autoBackupTimer = null;
 
-    function scheduleAutoBackup() {
-        if (!isLinked() || !navigator.onLine) return;
-        if (_autoBackupTimer) clearTimeout(_autoBackupTimer);
-        _autoBackupTimer = setTimeout(async () => {
-            _autoBackupTimer = null;
-            try {
-                const id = localStorage.getItem('glucolog_drive_file_id');
-                if (!id) return;
-                const token = await getTokenSilent();
-                await fetch(UPLOAD_API + '/files/' + id + '?uploadType=media', {
-                    method: 'PATCH',
-                    headers: {
-                        Authorization: 'Bearer ' + token,
-                        'Content-Type': 'application/json',
-                    },
-                    body: getLocalData(),
-                });
-                localStorage.setItem('glucolog_drive_backup_at', new Date().toISOString());
-            } catch (e) {
-                // silent — auto-backup failures are non-critical
-            }
-        }, 2000);
-    }
 
     let onImportCallback = null;
 
@@ -636,5 +599,5 @@ const Drive = (() => {
     initRedirectHandler();
     touchLocalModified();
 
-    return { link, backup, restore, unlink, isLinked, getBackupTime, getRelativeTime, getEmail, changeAccount, scheduleAutoBackup, setOnImport, touchLocalModified };
+    return { link, backup, restore, unlink, isLinked, getBackupTime, getRelativeTime, getEmail, changeAccount, setOnImport, touchLocalModified };
 })();
