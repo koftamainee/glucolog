@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.koftamainee.glucolog.domain.DayData
+import com.koftamainee.glucolog.domain.GlucoseSource
 import com.koftamainee.glucolog.domain.InsulinType
 import com.koftamainee.glucolog.domain.floatToTime
 import com.koftamainee.glucolog.ui.components.ConfirmDialog
@@ -41,7 +42,7 @@ fun JournalSection(
 ) {
     val entries = remember(data) {
         buildList {
-            data.glucose.forEach { p ->
+            data.glucose.filter { it.source == GlucoseSource.MANUAL.dbValue }.forEach { p ->
                 add(LogEntry(p.h, "glucose", p.g, glucoseId = p.id))
             }
             data.insulin.forEach { p ->

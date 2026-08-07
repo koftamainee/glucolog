@@ -1,6 +1,7 @@
 package com.koftamainee.glucolog.data.importexport
 
 import com.koftamainee.glucolog.domain.Constants
+import com.koftamainee.glucolog.domain.GlucosePoint
 import com.koftamainee.glucolog.domain.InsulinPoint
 import com.koftamainee.glucolog.domain.MealEntry
 import com.koftamainee.glucolog.domain.MealField
@@ -8,6 +9,7 @@ import com.koftamainee.glucolog.domain.PortableDay
 import kotlin.math.abs
 
 internal class DayBuilder {
+    private val glucose = mutableListOf<GlucosePoint>()
     private val insulin = mutableListOf<InsulinPoint>()
     private val meals = LinkedHashMap<String, MealEntry>()
     private val stool = mutableListOf<String>()
@@ -19,6 +21,16 @@ internal class DayBuilder {
     var stress: String? = null
     var notes: String? = null
     var conclusions: String? = null
+
+    fun addGlucose(h: Float, g: Float, source: String) {
+        if (g <= 0f || h !in 0f..24f) return
+        val idx = glucose.indexOfFirst { abs(it.h - h) < 0.001f && it.source == source }
+        if (idx >= 0) {
+            glucose[idx] = GlucosePoint(h, g, source)
+        } else {
+            glucose.add(GlucosePoint(h, g, source))
+        }
+    }
 
     fun addInsulin(h: Float, b: Float?, ba: Float?) {
         if (b == null && ba == null) return
@@ -60,6 +72,7 @@ internal class DayBuilder {
         val orderedMeals = MEAL_KEYS.mapNotNull { meals[it] }
         return PortableDay(
             date = date,
+            glucose = glucose.sortedBy { it.h },
             insulin = insulin.sortedBy { it.h },
             meals = orderedMeals,
             water = water,

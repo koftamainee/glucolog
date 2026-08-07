@@ -12,6 +12,7 @@ data class DayData(
     val day: DayEntity?,
     val glucose: List<GlucoseEntity>,
     val insulin: List<InsulinEntity>,
+    val prevInsulin: List<InsulinEntity> = emptyList(),
     val meals: List<MealEntity>,
     val stool: List<StoolEntity>,
 )

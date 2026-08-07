@@ -32,6 +32,16 @@ object JsonCodec {
             val dayObj = root.optJSONObject(dateKey) ?: continue
             val builder = DayBuilder()
 
+            dayObj.optJSONArray("glucose")?.let { arr ->
+                for (i in 0 until arr.length()) {
+                    val p = arr.optJSONObject(i) ?: continue
+                    val h = p.optDouble("h").takeIf { !it.isNaN() }?.toFloat() ?: continue
+                    val g = p.optDouble("g").takeIf { !it.isNaN() }?.toFloat() ?: continue
+                    val source = p.optString("source").takeIf { it.isNotEmpty() } ?: "manual"
+                    builder.addGlucose(h, g, source)
+                }
+            }
+
             dayObj.optJSONArray("insulin")?.let { arr ->
                 for (i in 0 until arr.length()) {
                     val p = arr.optJSONObject(i) ?: continue

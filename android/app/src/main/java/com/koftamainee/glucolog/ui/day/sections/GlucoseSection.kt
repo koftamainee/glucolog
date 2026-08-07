@@ -2,6 +2,7 @@ package com.koftamainee.glucolog.ui.day.sections
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,6 +39,8 @@ import com.koftamainee.glucolog.ui.theme.ChartBasalDark
 import com.koftamainee.glucolog.ui.theme.ChartBolus
 import com.koftamainee.glucolog.ui.theme.ChartBolusDark
 import com.koftamainee.glucolog.ui.theme.ChartGlucoseDark
+import com.koftamainee.glucolog.ui.theme.ChartManual
+import com.koftamainee.glucolog.ui.theme.ChartManualDark
 import com.koftamainee.glucolog.ui.theme.GlucologGreen
 
 @Composable
@@ -50,8 +53,8 @@ fun GlucoseSection(
 
     SectionCard(title = "Глюкоза и инсулин") {
         GlucoseChart(chart = chart)
-        ChartLegend()
         ChartXLabels()
+        ChartLegend()
         StatsRow(stats = stats)
 
         Row(
@@ -96,11 +99,16 @@ fun GlucoseSection(
 @Composable
 private fun ChartLegend() {
     val dark = isSystemInDarkTheme()
-    Row(
-        modifier = Modifier.padding(top = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp),
+        maxItemsInEachRow = 2,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         LegendItem(if (dark) ChartGlucoseDark else GlucologGreen, "Глюкоза")
+        LegendItem(if (dark) ChartManualDark else ChartManual, "Ручная")
         LegendItem(if (dark) ChartBolusDark else ChartBolus, "Болюс")
         LegendItem(if (dark) ChartBasalDark else ChartBasal, "Базальный")
     }
@@ -148,11 +156,12 @@ private fun StatsRow(stats: DayStats?) {
     val hypoColor = if (dark) ChartBasalDark else ChartBasal
     val hyperColor = if (dark) ChartBolusDark else ChartBolus
 
-    Row(
+    FlowRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text("n=${stats.n}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text("\u2193${fmt1(stats.min)} \u2191${fmt1(stats.max)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -163,17 +172,6 @@ private fun StatsRow(stats: DayStats?) {
         }
         if (stats.hyper > 0) {
             Text("\u2191${stats.hyper}", style = MaterialTheme.typography.bodySmall, color = hyperColor)
-        }
-        stats.trend?.let {
-            Text(
-                text = when (it) {
-                    DayStats.Trend.UP -> "\u2191"
-                    DayStats.Trend.DOWN -> "\u2193"
-                    DayStats.Trend.FLAT -> "\u2192"
-                },
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }

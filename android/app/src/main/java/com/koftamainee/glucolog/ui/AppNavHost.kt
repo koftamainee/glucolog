@@ -30,6 +30,8 @@ import com.koftamainee.glucolog.ui.day.DayScreen
 import com.koftamainee.glucolog.ui.day.DayViewModel
 import com.koftamainee.glucolog.ui.importexport.ImportExportScreen
 import com.koftamainee.glucolog.ui.importexport.ImportExportViewModel
+import com.koftamainee.glucolog.ui.xdrip.XdripSetupScreen
+import com.koftamainee.glucolog.ui.xdrip.XdripSetupViewModel
 
 @Composable
 fun AppNavHost(container: AppContainer) {
@@ -52,7 +54,17 @@ fun AppNavHost(container: AppContainer) {
                 }
                 composable("io") {
                     val vm: ImportExportViewModel = viewModel(factory = ImportExportViewModel.factory(container))
-                    ImportExportScreen(viewModel = vm)
+                    ImportExportScreen(
+                        viewModel = vm,
+                        onOpenXdrip = { navController.navigate("xdrip") },
+                    )
+                }
+                composable("xdrip") {
+                    val vm: XdripSetupViewModel = viewModel(factory = XdripSetupViewModel.factory(container))
+                    XdripSetupScreen(
+                        viewModel = vm,
+                        onBack = { navController.popBackStack() },
+                    )
                 }
             }
         }

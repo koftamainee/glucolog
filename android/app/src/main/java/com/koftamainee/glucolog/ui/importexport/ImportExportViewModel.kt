@@ -62,7 +62,7 @@ class ImportExportViewModel(
                 val text = FileOps.readText(appContext, uri)
                 val file = ImportCoordinator.parse(text)
                 _pending.value = file
-                _needStrategy.value = repo.hasNonGlucoseData()
+                _needStrategy.value = repo.hasData()
                 if (!_needStrategy.value) applyImport(replace = true)
             } catch (e: Exception) {
                 _message.value = e.message ?: "Не удалось импортировать"
@@ -82,7 +82,7 @@ class ImportExportViewModel(
                 repo.importDays(file.days, replace)
                 val fmt = if (file.isNewFormat) "новый (с источником)" else "веб"
                 _message.value = "Импортировано ${file.days.size} ${plural(file.days.size)} " +
-                    "(формат: $fmt). Глюкоза из файла не импортируется."
+                    "(формат: $fmt)"
             } catch (e: Exception) {
                 _message.value = e.message ?: "Не удалось импортировать"
             } finally {

@@ -24,7 +24,7 @@ fun statsOf(points: List<Float>, prevAvg: Float?): DayStats? {
     val avg = points.sum() / n
     val sd = sqrt(points.sumOf { ((it - avg) * (it - avg)).toDouble() } / n).toFloat()
     val hypo = countZones(points, 4f, above = false)
-    val hyper = countZones(points, 10f, above = true)
+    val hyper = countZones(points, 8f, above = true)
     val trend = prevAvg?.let { prev ->
         val diff = avg - prev
         when {

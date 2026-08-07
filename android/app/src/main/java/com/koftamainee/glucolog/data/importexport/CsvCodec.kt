@@ -65,8 +65,11 @@ object CsvCodec {
             if (dateKey.isEmpty() || type.isEmpty()) continue
             val day = days.getOrPut(dateKey) { DayBuilder() }
             val num = value.replace(',', '.')
+            val source = if (row.size > 5) row[5].trim().takeIf { it.isNotEmpty() } ?: "manual" else "manual"
             when {
-                type == "Глюкоза" -> Unit
+                type == "Глюкоза" -> timeToFloat(time)?.let {
+                    num.toFloatOrNull()?.let { g -> day.addGlucose(it, g, source) }
+                }
                 type == "Болюс" -> timeToFloat(time)?.let {
                     day.addInsulin(it, num.toFloatOrNull()?.takeIf { v -> v > 0f }, null)
                 }

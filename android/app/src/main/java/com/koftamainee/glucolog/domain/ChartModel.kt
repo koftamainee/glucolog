@@ -5,11 +5,13 @@ data class ChartPoint(val h: Float, val g: Float)
 data class ChartModel(
     val line: List<ChartPoint>,
     val manual: List<ChartPoint>,
+    val meals: List<ChartPoint>,
     val bolus: List<ChartPoint>,
+    val prevBolus: List<ChartPoint>,
     val basal: List<ChartPoint>,
 ) {
     companion object {
-        val EMPTY = ChartModel(emptyList(), emptyList(), emptyList(), emptyList())
+        val EMPTY = ChartModel(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
 
         fun from(data: DayData): ChartModel {
             val line = data.glucose
@@ -20,13 +22,19 @@ data class ChartModel(
                 .filter { it.source == GlucoseSource.MANUAL.dbValue }
                 .map { ChartPoint(it.h, it.g) }
                 .sortedBy { it.h }
+            val meals = data.meals
+                .mapNotNull { m -> timeToFloat(m.time)?.let { ChartPoint(it, 0f) } }
+                .sortedBy { it.h }
             val bolus = data.insulin
+                .mapNotNull { p -> p.bolus?.takeIf { it > 0f }?.let { ChartPoint(p.h, it) } }
+                .sortedBy { it.h }
+            val prevBolus = data.prevInsulin
                 .mapNotNull { p -> p.bolus?.takeIf { it > 0f }?.let { ChartPoint(p.h, it) } }
                 .sortedBy { it.h }
             val basal = data.insulin
                 .mapNotNull { p -> p.basal?.takeIf { it > 0f }?.let { ChartPoint(p.h, it) } }
                 .sortedBy { it.h }
-            return ChartModel(line, manual, bolus, basal)
+            return ChartModel(line, manual, meals, bolus, prevBolus, basal)
         }
     }
 }

@@ -18,6 +18,7 @@ import com.koftamainee.glucolog.domain.InsulinType
 import com.koftamainee.glucolog.domain.MealEntry
 import com.koftamainee.glucolog.domain.MealField
 import com.koftamainee.glucolog.domain.PortableDay
+import com.koftamainee.glucolog.data.xdrip.XdripReading
 import java.time.LocalDate
 import kotlin.math.abs
 import kotlinx.coroutines.flow.Flow
@@ -33,14 +34,17 @@ class DayRepository(private val db: AppDatabase) {
 
     fun observeDay(date: LocalDate): Flow<DayData> {
         val key = DateKeys.key(date)
-        return combine(
+        val base = combine(
             dayDao.observe(key),
             glucoseDao.observe(key),
             insulinDao.observe(key),
             mealDao.observe(key),
             stoolDao.observe(key),
         ) { day, glucose, insulin, meals, stool ->
-            DayData(date, day, glucose, insulin, meals, stool)
+            DayData(date, day, glucose, insulin, emptyList(), meals, stool)
+        }
+        return combine(base, insulinDao.observe(DateKeys.key(date.minusDays(1)))) { data, prev ->
+            data.copy(prevInsulin = prev)
         }
     }
 
@@ -49,6 +53,8 @@ class DayRepository(private val db: AppDatabase) {
         return glucoseDao.observeAvg(DateKeys.key(prev))
     }
 
+    fun observeLastXdrip(): Flow<GlucoseEntity?> = glucoseDao.observeLastXdrip()
+
     suspend fun getDay(date: LocalDate): DayData {
         val key = DateKeys.key(date)
         return DayData(
@@ -56,6 +62,7 @@ class DayRepository(private val db: AppDatabase) {
             day = dayDao.get(key),
             glucose = glucoseDao.get(key),
             insulin = insulinDao.get(key),
+            prevInsulin = insulinDao.get(DateKeys.key(date.minusDays(1))),
             meals = MEAL_KEYS.mapNotNull { keyOf -> mealDao.get(key, keyOf) },
             stool = stoolDao.get(key),
         )
@@ -89,6 +96,10 @@ class DayRepository(private val db: AppDatabase) {
     suspend fun updateGlucose(point: GlucoseEntity) = glucoseDao.update(point)
 
     suspend fun deleteGlucose(id: Long) = glucoseDao.deleteById(id)
+
+    suspend fun insertXdripReadings(readings: List<XdripReading>) {
+        readings.forEach { r -> addGlucose(r.date, r.h, r.g, GlucoseSource.XDRIP) }
+    }
 
     suspend fun setBolus(date: LocalDate, h: Float, value: Float) =
         setInsulinType(date, h, InsulinType.BOLUS, value)
@@ -189,12 +200,15 @@ class DayRepository(private val db: AppDatabase) {
         }
     }
 
-    suspend fun hasNonGlucoseData(): Boolean =
-        dayDao.count() > 0 || insulinDao.count() > 0 || mealDao.count() > 0 || stoolDao.count() > 0
+    suspend fun hasData(): Boolean =
+        dayDao.count() > 0 || glucoseDao.count() > 0 || insulinDao.count() > 0 ||
+            mealDao.count() > 0 || stoolDao.count() > 0
 
     suspend fun importDays(days: List<PortableDay>, replace: Boolean) {
         db.withTransaction {
+            val fileHasGlucose = days.any { it.glucose.isNotEmpty() }
             if (replace) {
+                if (fileHasGlucose) glucoseDao.deleteAll()
                 insulinDao.deleteAll()
                 mealDao.deleteAll()
                 dayDao.deleteAll()
@@ -202,6 +216,19 @@ class DayRepository(private val db: AppDatabase) {
             }
             days.forEach { day ->
                 val key = day.date
+                val existingGlucose = glucoseDao.get(key)
+                day.glucose.forEach { p ->
+                    val existing = existingGlucose.firstOrNull {
+                        abs(it.h - p.h) < 0.001 && it.source == p.source
+                    }
+                    if (existing != null) {
+                        if (abs(existing.g - p.g) > 0.001f) glucoseDao.update(existing.copy(g = p.g))
+                    } else {
+                        glucoseDao.insert(
+                            GlucoseEntity(date = key, h = p.h, g = p.g, source = p.source)
+                        )
+                    }
+                }
                 val existingInsulin = insulinDao.get(key)
                 day.insulin.forEach { p ->
                     val existing = existingInsulin.firstOrNull { abs(it.h - p.h) < 0.001 }

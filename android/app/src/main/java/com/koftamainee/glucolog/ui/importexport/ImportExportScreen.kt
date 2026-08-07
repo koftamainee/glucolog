@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 
 @Composable
-fun ImportExportScreen(viewModel: ImportExportViewModel) {
+fun ImportExportScreen(viewModel: ImportExportViewModel, onOpenXdrip: () -> Unit = {}) {
     val busy by viewModel.busy.collectAsState()
     val message by viewModel.message.collectAsState()
     val pending by viewModel.pending.collectAsState()
@@ -80,11 +80,14 @@ fun ImportExportScreen(viewModel: ImportExportViewModel) {
                 onClick = { importLauncher.launch(arrayOf("*/*")) },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Импорт JSON / CSV") }
-            Text(
-                text = "Глюкоза из файла не импортируется",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Text("Интеграция", style = MaterialTheme.typography.titleMedium)
+            Button(
+                onClick = onOpenXdrip,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Настройка xDrip") }
 
             if (busy) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
