@@ -68,6 +68,36 @@ class DayRepository(private val db: AppDatabase) {
         )
     }
 
+    suspend fun getDaysRange(from: LocalDate, to: LocalDate): List<PortableDay> {
+        val fromKey = DateKeys.key(from)
+        val toKey = DateKeys.key(to)
+        val dayMap = dayDao.getRange(fromKey, toKey).associateBy { it.date }
+        val allGlucose = glucoseDao.getRange(fromKey, toKey)
+        val allInsulin = insulinDao.getRange(fromKey, toKey)
+        val allMeals = mealDao.getRange(fromKey, toKey)
+        val allStool = stoolDao.getRange(fromKey, toKey)
+        val dates = (dayMap.keys + allGlucose.map { it.date } + allInsulin.map { it.date } +
+            allMeals.map { it.date } + allStool.map { it.date }).distinct().sorted()
+        return dates.map { key ->
+            val day = dayMap[key]
+            PortableDay(
+                date = key,
+                glucose = allGlucose.filter { it.date == key }
+                    .map { GlucosePoint(it.h, it.g, it.source) }
+                    .sortedBy { it.h },
+                insulin = allInsulin.filter { it.date == key }
+                    .map { InsulinPoint(it.h, it.bolus, it.basal) }
+                    .sortedBy { it.h },
+                meals = MEAL_KEYS.mapNotNull { mk ->
+                    allMeals.firstOrNull { it.date == key && it.key == mk }?.let {
+                        MealEntry(it.key, it.time, it.hunger, it.food, it.carbs)
+                    }
+                },
+                stool = allStool.filter { it.date == key }.map { it.option },
+            )
+        }
+    }
+
     suspend fun setDayField(date: LocalDate, setter: DayEntity.() -> DayEntity) {
         val key = DateKeys.key(date)
         val current = dayDao.get(key) ?: DayEntity(date = key)
@@ -148,8 +178,7 @@ class DayRepository(private val db: AppDatabase) {
             MealField.TIME -> current.copy(time = value)
             MealField.HUNGER -> current.copy(hunger = value?.toIntOrNull())
             MealField.FOOD -> current.copy(food = Constants.blankToNull(value))
-            MealField.PHYS -> current.copy(phys = Constants.blankToNull(value))
-            MealField.EMO -> current.copy(emo = Constants.blankToNull(value))
+            MealField.CARBS -> current.copy(carbs = value?.toIntOrNull())
         }
         mealDao.upsert(updated)
     }
@@ -184,7 +213,7 @@ class DayRepository(private val db: AppDatabase) {
                     .sortedBy { it.h },
                 meals = MEAL_KEYS.mapNotNull { mk ->
                     allMeals.firstOrNull { it.date == key && it.key == mk }?.let {
-                        MealEntry(it.key, it.time, it.hunger, it.food, it.phys, it.emo)
+                        MealEntry(it.key, it.time, it.hunger, it.food, it.carbs)
                     }
                 },
                 water = day?.water,
@@ -248,8 +277,7 @@ class DayRepository(private val db: AppDatabase) {
                             time = m.time ?: existing.time,
                             hunger = m.hunger ?: existing.hunger,
                             food = m.food ?: existing.food,
-                            phys = m.phys ?: existing.phys,
-                            emo = m.emo ?: existing.emo,
+                            carbs = m.carbs ?: existing.carbs,
                         )
                     } else {
                         MealEntity(
@@ -258,8 +286,7 @@ class DayRepository(private val db: AppDatabase) {
                             time = m.time,
                             hunger = m.hunger,
                             food = m.food,
-                            phys = m.phys,
-                            emo = m.emo,
+                            carbs = m.carbs,
                         )
                     }
                     mealDao.upsert(updated)

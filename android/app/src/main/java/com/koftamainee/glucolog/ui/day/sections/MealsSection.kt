@@ -9,13 +9,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.koftamainee.glucolog.data.db.MealEntity
 import com.koftamainee.glucolog.domain.Constants
@@ -25,24 +29,7 @@ import com.koftamainee.glucolog.ui.components.SectionCard
 import com.koftamainee.glucolog.ui.components.TimeField
 
 @Composable
-fun MealsSection(
-    meals: List<MealEntity>,
-    onSetField: (mealKey: String, field: MealField, value: String?) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Constants.MEALS.forEach { meal ->
-            val data = meals.firstOrNull { it.key == meal.key }
-            MealCard(
-                title = meal.name,
-                meal = data,
-                onSetField = { field, value -> onSetField(meal.key, field, value) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun MealCard(
+fun MealCard(
     title: String,
     meal: MealEntity?,
     onSetField: (MealField, String?) -> Unit,
@@ -65,36 +52,33 @@ private fun MealCard(
             )
         }
 
-        DebouncedOutlinedTextField(
-            value = meal?.food ?: "",
-            onCommit = { onSetField(MealField.FOOD, it) },
-            placeholder = "Приём пищи",
-            minLines = 2,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp),
-        )
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             DebouncedOutlinedTextField(
-                value = meal?.phys ?: "",
-                onCommit = { onSetField(MealField.PHYS, it) },
-                placeholder = "Физ. ощущения",
+                value = meal?.food ?: "",
+                onCommit = { onSetField(MealField.FOOD, it) },
+                placeholder = "Приём пищи",
                 minLines = 2,
                 modifier = Modifier.weight(1f),
             )
-            DebouncedOutlinedTextField(
-                value = meal?.emo ?: "",
-                onCommit = { onSetField(MealField.EMO, it) },
-                placeholder = "Эмоции",
-                minLines = 2,
-                modifier = Modifier.weight(1f),
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "Углеводы",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                DebouncedOutlinedTextField(
+                    value = meal?.carbs?.toString() ?: "",
+                    onCommit = { onSetField(MealField.CARBS, it) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.width(64.dp),
+                )
+            }
         }
     }
 }

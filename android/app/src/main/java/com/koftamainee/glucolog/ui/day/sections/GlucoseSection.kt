@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -42,16 +46,22 @@ import com.koftamainee.glucolog.ui.theme.ChartGlucoseDark
 import com.koftamainee.glucolog.ui.theme.ChartManual
 import com.koftamainee.glucolog.ui.theme.ChartManualDark
 import com.koftamainee.glucolog.ui.theme.GlucologGreen
+import java.time.LocalDate
 
 @Composable
 fun GlucoseSection(
     data: DayData,
     stats: DayStats?,
     onAdd: (h: Float, g: Float) -> Unit,
+    onOpenRoam: (LocalDate) -> Unit,
 ) {
     val chart = remember(data) { ChartModel.from(data) }
 
-    SectionCard(title = "Глюкоза и инсулин") {
+    SectionCard(title = "Глюкоза и инсулин", trailing = {
+        IconButton(onClick = { onOpenRoam(data.date) }) {
+            Icon(Icons.Filled.Fullscreen, contentDescription = "Развернуть график")
+        }
+    }) {
         GlucoseChart(chart = chart)
         ChartXLabels()
         ChartLegend()

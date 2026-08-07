@@ -18,6 +18,9 @@ interface StoolDao {
     @Query("SELECT * FROM stool ORDER BY date, option")
     suspend fun getAll(): List<StoolEntity>
 
+    @Query("SELECT * FROM stool WHERE date BETWEEN :from AND :to ORDER BY date, option")
+    suspend fun getRange(from: String, to: String): List<StoolEntity>
+
     @Query("SELECT COUNT(*) FROM stool")
     suspend fun count(): Int
 

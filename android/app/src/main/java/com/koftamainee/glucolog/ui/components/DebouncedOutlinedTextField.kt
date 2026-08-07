@@ -1,5 +1,6 @@
 package com.koftamainee.glucolog.ui.components
 
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +20,8 @@ fun DebouncedOutlinedTextField(
     modifier: Modifier = Modifier,
     placeholder: String = "",
     minLines: Int = 1,
+    singleLine: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var text by rememberSaveable { mutableStateOf(value) }
     var dirty by remember(value) { mutableStateOf(false) }
@@ -42,6 +45,8 @@ fun DebouncedOutlinedTextField(
         },
         placeholder = { Text(placeholder) },
         minLines = minLines,
+        singleLine = singleLine,
+        keyboardOptions = keyboardOptions,
         modifier = modifier,
     )
 }

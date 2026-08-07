@@ -41,8 +41,7 @@ object CsvCodec {
                 m.time?.let { rows.add(listOf(day.date, it, "${meal.key} время", "", "")) }
                 m.hunger?.takeIf { it > 0 }?.let { rows.add(listOf(day.date, "", "${meal.key} голод", "$it", "")) }
                 m.food?.let { rows.add(listOf(day.date, "", "${meal.key} еда", it.replace("\n", " "), "")) }
-                m.phys?.let { rows.add(listOf(day.date, "", "${meal.key} физ", it.replace("\n", " "), "")) }
-                m.emo?.let { rows.add(listOf(day.date, "", "${meal.key} эмоции", it.replace("\n", " "), "")) }
+                m.carbs?.let { rows.add(listOf(day.date, "", "${meal.key} углеводы", "$it", "г")) }
             }
         }
         return rows.joinToString("\n") { row ->
@@ -88,8 +87,7 @@ object CsvCodec {
                 type.endsWith(" время") -> day.setMealField(type.removeSuffix(" время"), MealField.TIME, time)
                 type.endsWith(" голод") -> day.setMealField(type.removeSuffix(" голод"), MealField.HUNGER, value)
                 type.endsWith(" еда") -> day.setMealField(type.removeSuffix(" еда"), MealField.FOOD, value)
-                type.endsWith(" физ") -> day.setMealField(type.removeSuffix(" физ"), MealField.PHYS, value)
-                type.endsWith(" эмоции") -> day.setMealField(type.removeSuffix(" эмоции"), MealField.EMO, value)
+                type.endsWith(" углеводы") -> day.setMealField(type.removeSuffix(" углеводы"), MealField.CARBS, value)
             }
         }
         if (days.isEmpty()) throw IllegalArgumentException("Файл не похож на экспорт Glucolog")

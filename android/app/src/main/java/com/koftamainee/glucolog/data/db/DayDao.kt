@@ -18,6 +18,9 @@ interface DayDao {
     @Query("SELECT * FROM day ORDER BY date")
     suspend fun getAll(): List<DayEntity>
 
+    @Query("SELECT * FROM day WHERE date BETWEEN :from AND :to ORDER BY date")
+    suspend fun getRange(from: String, to: String): List<DayEntity>
+
     @Query("SELECT COUNT(*) FROM day")
     suspend fun count(): Int
 

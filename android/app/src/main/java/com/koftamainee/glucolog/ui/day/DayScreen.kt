@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,17 +30,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.koftamainee.glucolog.domain.Constants
 import com.koftamainee.glucolog.domain.DayTextField
 import com.koftamainee.glucolog.domain.GlucoseSource
-import com.koftamainee.glucolog.domain.InsulinType
-import com.koftamainee.glucolog.domain.MealField
 import com.koftamainee.glucolog.domain.formatDateLabel
 import com.koftamainee.glucolog.domain.statsOf
+import com.koftamainee.glucolog.ui.day.sections.BasalCard
+import com.koftamainee.glucolog.ui.day.sections.BolusCard
+import com.koftamainee.glucolog.ui.day.sections.ConclusionsCard
 import com.koftamainee.glucolog.ui.day.sections.GlucoseSection
-import com.koftamainee.glucolog.ui.day.sections.InsulinSection
 import com.koftamainee.glucolog.ui.day.sections.JournalSection
-import com.koftamainee.glucolog.ui.day.sections.MealsSection
-import com.koftamainee.glucolog.ui.day.sections.NotesSection
+import com.koftamainee.glucolog.ui.day.sections.MealCard
+import com.koftamainee.glucolog.ui.day.sections.NotesCard
 import com.koftamainee.glucolog.ui.day.sections.SleepSection
 import com.koftamainee.glucolog.ui.day.sections.SportSection
 import com.koftamainee.glucolog.ui.day.sections.StoolSection
@@ -52,7 +53,10 @@ import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DayScreen(viewModel: DayViewModel) {
+fun DayScreen(
+    viewModel: DayViewModel,
+    onOpenRoam: (LocalDate) -> Unit,
+) {
     val date by viewModel.date.collectAsState()
     val data by viewModel.dayData.collectAsState()
     var showDatePicker by remember { mutableStateOf(false) }
@@ -79,51 +83,77 @@ fun DayScreen(viewModel: DayViewModel) {
                     modifier = Modifier.padding(16.dp),
                 )
             } else {
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 12.dp),
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    GlucoseSection(
-                        data = day,
-                        stats = statsOf(day.glucose.map { it.g }, prevAvg),
-                        onAdd = { h, g -> viewModel.addGlucose(h, g, GlucoseSource.MANUAL) },
-                    )
-                    InsulinSection(
-                        data = day,
-                        onAddBolus = viewModel::setBolus,
-                        onAddBasal = viewModel::setBasal,
-                    )
-                    MealsSection(
-                        meals = day.meals,
-                        onSetField = viewModel::setMealField,
-                    )
-                    WaterSection(data = day, onSet = viewModel::setWater)
-                    SportSection(
-                        data = day,
-                        onSport = viewModel::setSport,
-                        onSteps = viewModel::setSteps,
-                    )
-                    StoolSection(
-                        selected = day.stool.map { it.option },
-                        onToggle = viewModel::toggleStool,
-                    )
-                    SleepSection(
-                        data = day,
-                        onStart = viewModel::setSleepStart,
-                        onEnd = viewModel::setSleepEnd,
-                    )
-                    StressSection(
-                        selected = day.day?.stress,
-                        onSelect = viewModel::setStress,
-                    )
-                    NotesSection(data = day, onText = viewModel::setText)
-                    JournalSection(
-                        data = day,
-                        onDeleteGlucose = viewModel::deleteGlucose,
-                        onDeleteInsulin = viewModel::removeInsulin,
-                    )
+                    item(key = "glucose") {
+                        GlucoseSection(
+                            data = day,
+                            stats = statsOf(day.glucose.map { it.g }, prevAvg),
+                            onAdd = { h, g -> viewModel.addGlucose(h, g, GlucoseSource.MANUAL) },
+                            onOpenRoam = onOpenRoam,
+                        )
+                    }
+                    item(key = "bolus") { BolusCard(onAdd = viewModel::setBolus) }
+                    item(key = "basal") { BasalCard(onAdd = viewModel::setBasal) }
+                    items(Constants.MEALS, key = { it.key }) { meal ->
+                        MealCard(
+                            title = meal.name,
+                            meal = day.meals.firstOrNull { it.key == meal.key },
+                            onSetField = { field, value ->
+                                viewModel.setMealField(meal.key, field, value)
+                            },
+                        )
+                    }
+                    item(key = "water") {
+                        WaterSection(data = day, onSet = viewModel::setWater)
+                    }
+                    item(key = "sport") {
+                        SportSection(
+                            data = day,
+                            onSport = viewModel::setSport,
+                            onSteps = viewModel::setSteps,
+                        )
+                    }
+                    item(key = "stool") {
+                        StoolSection(
+                            selected = day.stool.map { it.option },
+                            onToggle = viewModel::toggleStool,
+                        )
+                    }
+                    item(key = "sleep") {
+                        SleepSection(
+                            data = day,
+                            onStart = viewModel::setSleepStart,
+                            onEnd = viewModel::setSleepEnd,
+                        )
+                    }
+                    item(key = "stress") {
+                        StressSection(
+                            selected = day.day?.stress,
+                            onSelect = viewModel::setStress,
+                        )
+                    }
+                    item(key = "notes") {
+                        NotesCard(
+                            initial = day.day?.notes ?: "",
+                            onCommit = { viewModel.setText(DayTextField.NOTES, it) },
+                        )
+                    }
+                    item(key = "conclusions") {
+                        ConclusionsCard(
+                            initial = day.day?.conclusions ?: "",
+                            onCommit = { viewModel.setText(DayTextField.CONCLUSIONS, it) },
+                        )
+                    }
+                    item(key = "journal") {
+                        JournalSection(
+                            data = day,
+                            onDeleteGlucose = viewModel::deleteGlucose,
+                            onDeleteInsulin = viewModel::removeInsulin,
+                        )
+                    }
                 }
             }
         }

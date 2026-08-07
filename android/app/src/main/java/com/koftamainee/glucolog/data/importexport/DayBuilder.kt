@@ -47,8 +47,6 @@ internal class DayBuilder {
         if (entry.key !in MEAL_KEYS) return
         meals[entry.key] = entry.copy(
             food = Constants.blankToNull(entry.food),
-            phys = Constants.blankToNull(entry.phys),
-            emo = Constants.blankToNull(entry.emo),
         )
     }
 
@@ -59,8 +57,7 @@ internal class DayBuilder {
             MealField.TIME -> current.copy(time = value)
             MealField.HUNGER -> current.copy(hunger = value?.toIntOrNull())
             MealField.FOOD -> current.copy(food = Constants.blankToNull(value))
-            MealField.PHYS -> current.copy(phys = Constants.blankToNull(value))
-            MealField.EMO -> current.copy(emo = Constants.blankToNull(value))
+            MealField.CARBS -> current.copy(carbs = value?.toIntOrNull())
         }
     }
 

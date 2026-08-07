@@ -19,6 +19,9 @@ interface InsulinDao {
     @Query("SELECT * FROM insulin ORDER BY date, h")
     suspend fun getAll(): List<InsulinEntity>
 
+    @Query("SELECT * FROM insulin WHERE date BETWEEN :from AND :to ORDER BY date, h")
+    suspend fun getRange(from: String, to: String): List<InsulinEntity>
+
     @Query("SELECT COUNT(*) FROM insulin")
     suspend fun count(): Int
 

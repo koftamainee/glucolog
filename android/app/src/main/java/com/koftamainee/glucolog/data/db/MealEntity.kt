@@ -15,6 +15,5 @@ data class MealEntity(
     val time: String? = null,
     val hunger: Int? = null,
     val food: String? = null,
-    val phys: String? = null,
-    val emo: String? = null,
+    val carbs: Int? = null,
 )

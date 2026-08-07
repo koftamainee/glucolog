@@ -1,3 +1,3 @@
 package com.koftamainee.glucolog.domain
 
-enum class MealField { TIME, HUNGER, FOOD, PHYS, EMO }
+enum class MealField { TIME, HUNGER, FOOD, CARBS }

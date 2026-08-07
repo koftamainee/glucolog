@@ -21,15 +21,20 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.koftamainee.glucolog.di.AppContainer
+import com.koftamainee.glucolog.domain.DateKeys
 import com.koftamainee.glucolog.ui.day.DayScreen
 import com.koftamainee.glucolog.ui.day.DayViewModel
 import com.koftamainee.glucolog.ui.importexport.ImportExportScreen
 import com.koftamainee.glucolog.ui.importexport.ImportExportViewModel
+import com.koftamainee.glucolog.ui.roam.RoamScreen
+import com.koftamainee.glucolog.ui.roam.RoamViewModel
 import com.koftamainee.glucolog.ui.xdrip.XdripSetupScreen
 import com.koftamainee.glucolog.ui.xdrip.XdripSetupViewModel
 
@@ -50,7 +55,22 @@ fun AppNavHost(container: AppContainer) {
             ) {
                 composable("day") {
                     val vm: DayViewModel = viewModel(factory = DayViewModel.factory(container))
-                    DayScreen(viewModel = vm)
+                    DayScreen(
+                        viewModel = vm,
+                        onOpenRoam = { date ->
+                            navController.navigate("roam/${DateKeys.key(date)}")
+                        },
+                    )
+                }
+                composable(
+                    route = "roam/{date}",
+                    arguments = listOf(navArgument("date") { type = NavType.StringType }),
+                ) {
+                    val vm: RoamViewModel = viewModel(factory = RoamViewModel.factory(container))
+                    RoamScreen(
+                        viewModel = vm,
+                        onBack = { navController.popBackStack() },
+                    )
                 }
                 composable("io") {
                     val vm: ImportExportViewModel = viewModel(factory = ImportExportViewModel.factory(container))
@@ -68,7 +88,10 @@ fun AppNavHost(container: AppContainer) {
                 }
             }
         }
-        BottomNav(navController = navController)
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+        if (currentRoute != "roam/{date}") {
+            BottomNav(navController = navController)
+        }
     }
 }
 

@@ -60,8 +60,7 @@ object JsonCodec {
                         time = m.optString("time").takeIf { it.isNotEmpty() },
                         hunger = m.optInt("hunger", -1).takeIf { it in 1..5 },
                         food = m.optString("food").takeIf { it.isNotEmpty() },
-                        phys = m.optString("phys").takeIf { it.isNotEmpty() },
-                        emo = m.optString("emo").takeIf { it.isNotEmpty() },
+                        carbs = m.optInt("carbs", -1).takeIf { it in 0..999 },
                     )
                 )
             }
@@ -133,8 +132,7 @@ object JsonCodec {
             m.time?.let { mo.put("time", it) }
             m.hunger?.let { mo.put("hunger", it) }
             m.food?.let { mo.put("food", it) }
-            m.phys?.let { mo.put("phys", it) }
-            m.emo?.let { mo.put("emo", it) }
+            m.carbs?.let { mo.put("carbs", it) }
             o.put(meal.key, mo)
         }
         day.water?.let { o.put("water", it) }

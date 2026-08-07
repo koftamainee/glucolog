@@ -18,6 +18,9 @@ interface GlucoseDao {
     @Query("SELECT * FROM glucose ORDER BY date, h")
     suspend fun getAll(): List<GlucoseEntity>
 
+    @Query("SELECT * FROM glucose WHERE date BETWEEN :from AND :to ORDER BY date, h")
+    suspend fun getRange(from: String, to: String): List<GlucoseEntity>
+
     @Query("SELECT * FROM glucose WHERE source = 'xdrip' ORDER BY date DESC, h DESC LIMIT 1")
     fun observeLastXdrip(): Flow<GlucoseEntity?>
 

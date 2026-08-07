@@ -19,6 +19,9 @@ interface MealDao {
     @Query("SELECT * FROM meal ORDER BY date, key")
     suspend fun getAll(): List<MealEntity>
 
+    @Query("SELECT * FROM meal WHERE date BETWEEN :from AND :to ORDER BY date, key")
+    suspend fun getRange(from: String, to: String): List<MealEntity>
+
     @Query("SELECT COUNT(*) FROM meal")
     suspend fun count(): Int
 

@@ -1,7 +1,5 @@
 package com.koftamainee.glucolog.ui.day.sections
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
@@ -16,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.koftamainee.glucolog.domain.DayData
 import com.koftamainee.glucolog.domain.currentTimeString
 import com.koftamainee.glucolog.domain.timeToFloat
 import com.koftamainee.glucolog.ui.components.PrimaryAddButton
@@ -24,51 +21,50 @@ import com.koftamainee.glucolog.ui.components.SectionCard
 import com.koftamainee.glucolog.ui.components.TimeField
 
 @Composable
-fun InsulinSection(
-    data: DayData,
-    onAddBolus: (h: Float, value: Float) -> Unit,
-    onAddBasal: (h: Float, value: Float) -> Unit,
-) {
-    var bolus by rememberSaveable { mutableStateOf("") }
-    var bolusTime by rememberSaveable { mutableStateOf(currentTimeString()) }
-    var basal by rememberSaveable { mutableStateOf("") }
-    var basalTime by rememberSaveable { mutableStateOf(currentTimeString()) }
+fun BolusCard(onAdd: (h: Float, value: Float) -> Unit) {
+    var value by rememberSaveable { mutableStateOf("") }
+    var time by rememberSaveable { mutableStateOf(currentTimeString()) }
 
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        SectionCard(title = "Болюс") {
-            InsulinForm(
-                value = bolus,
-                time = bolusTime,
-                onValue = { bolus = it },
-                onTime = { bolusTime = it },
-                onAdd = {
-                    val v = bolus.toFloatOrNull()
-                    val h = timeToFloat(bolusTime)
-                    if (v != null && v > 0f && h != null) {
-                        onAddBolus(h, v)
-                        bolus = ""
-                        bolusTime = currentTimeString()
-                    }
-                },
-            )
-        }
-        SectionCard(title = "Базальный") {
-            InsulinForm(
-                value = basal,
-                time = basalTime,
-                onValue = { basal = it },
-                onTime = { basalTime = it },
-                onAdd = {
-                    val v = basal.toFloatOrNull()
-                    val h = timeToFloat(basalTime)
-                    if (v != null && v > 0f && h != null) {
-                        onAddBasal(h, v)
-                        basal = ""
-                        basalTime = currentTimeString()
-                    }
-                },
-            )
-        }
+    SectionCard(title = "Болюс") {
+        InsulinForm(
+            value = value,
+            time = time,
+            onValue = { value = it },
+            onTime = { time = it },
+            onAdd = {
+                val v = value.toFloatOrNull()
+                val h = timeToFloat(time)
+                if (v != null && v > 0f && h != null) {
+                    onAdd(h, v)
+                    value = ""
+                    time = currentTimeString()
+                }
+            },
+        )
+    }
+}
+
+@Composable
+fun BasalCard(onAdd: (h: Float, value: Float) -> Unit) {
+    var value by rememberSaveable { mutableStateOf("") }
+    var time by rememberSaveable { mutableStateOf(currentTimeString()) }
+
+    SectionCard(title = "Базальный") {
+        InsulinForm(
+            value = value,
+            time = time,
+            onValue = { value = it },
+            onTime = { time = it },
+            onAdd = {
+                val v = value.toFloatOrNull()
+                val h = timeToFloat(time)
+                if (v != null && v > 0f && h != null) {
+                    onAdd(h, v)
+                    value = ""
+                    time = currentTimeString()
+                }
+            },
+        )
     }
 }
 
@@ -82,7 +78,7 @@ private fun InsulinForm(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
     ) {
         OutlinedTextField(
             value = value,
