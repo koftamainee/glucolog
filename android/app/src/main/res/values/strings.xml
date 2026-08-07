@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Glucolog</string>
+    <string name="xdrip_service_channel_name">Мониторинг xDrip</string>
+    <string name="xdrip_service_title">Glucolog</string>
+    <string name="xdrip_service_text">Синхронизация с xDrip активна</string>
 </resources>
