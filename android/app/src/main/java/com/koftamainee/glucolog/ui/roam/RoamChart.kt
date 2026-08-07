@@ -11,9 +11,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
@@ -24,7 +30,9 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.koftamainee.glucolog.domain.ChartPoint
 import com.koftamainee.glucolog.domain.RoamModel
+import com.koftamainee.glucolog.domain.floatToTime
 import com.koftamainee.glucolog.ui.chart.MIN_G
 import com.koftamainee.glucolog.ui.chart.MAX_G
 import com.koftamainee.glucolog.ui.chart.chartColors
@@ -37,12 +45,14 @@ import com.koftamainee.glucolog.ui.chart.drawRangeBand
 import com.koftamainee.glucolog.ui.chart.drawRoamBolusDecay
 import com.koftamainee.glucolog.ui.chart.drawXGrid
 import com.koftamainee.glucolog.ui.chart.drawYGrid
+import com.koftamainee.glucolog.ui.chart.fmt
 import java.time.LocalDate
 import kotlin.math.floor
 
 internal const val INITIAL_PX_PER_HOUR = 34f
 private const val MIN_PX_PER_HOUR = 6f
 private const val MAX_PX_PER_HOUR = 200f
+private val TAP_SNAP_PX = 24.dp
 
 @Composable
 fun RoamChart(
@@ -57,9 +67,13 @@ fun RoamChart(
     val colors = chartColors(dark)
     val measurer = rememberTextMeasurer()
 
+    var crosshair by remember { mutableStateOf<ChartPoint?>(null) }
+
+    val allGlucose = remember(model) { (model.line + model.manual).sortedBy { it.h } }
     val latestModel by rememberUpdatedState(model)
     val latestCenterHour by rememberUpdatedState(centerHour)
     val latestPxPerHour by rememberUpdatedState(pxPerHour)
+    val latestAllGlucose by rememberUpdatedState(allGlucose)
 
     Box(modifier = modifier) {
         Canvas(
@@ -67,12 +81,14 @@ fun RoamChart(
                 .fillMaxSize()
                 .pointerInput(Unit) {
                     awaitEachGesture {
-                        awaitFirstDown(requireUnconsumed = false)
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val downX = down.position.x
                         var px = latestPxPerHour
                         var center = latestCenterHour
                         var panAccum = Offset.Zero
                         var zoomAccum = 1f
                         var moved = false
+                        var cleared = false
                         val w = size.width.toFloat()
                         while (true) {
                             val event = awaitPointerEvent()
@@ -87,6 +103,10 @@ fun RoamChart(
                                 moved = panMoved || zoomMoved
                             }
                             if (moved) {
+                                if (!cleared) {
+                                    cleared = true
+                                    crosshair = null
+                                }
                                 val focal = event.calculateCentroid(useCurrent = false).x
                                 val pxNew = (px * zoomChange).coerceIn(MIN_PX_PER_HOUR, MAX_PX_PER_HOUR)
                                 val viewportStart = center - w / 2f / px
@@ -99,10 +119,23 @@ fun RoamChart(
                                 event.changes.forEach { if (it.positionChanged()) it.consume() }
                             }
                         }
+                        if (!moved) {
+                            val viewportStart = center - w / 2f / px
+                            val targetHour = viewportStart + downX / px
+                            val nearest = latestAllGlucose.minByOrNull {
+                                kotlin.math.abs(it.h - targetHour)
+                            }
+                            val distPx = if (nearest != null) {
+                                kotlin.math.abs((nearest.h - targetHour) * px)
+                            } else {
+                                Float.MAX_VALUE
+                            }
+                            crosshair = if (distPx <= TAP_SNAP_PX.toPx()) nearest else null
+                        }
                     }
                 },
         ) {
-            drawRoam(latestModel, colors, measurer, latestPxPerHour, latestCenterHour)
+            drawRoam(latestModel, colors, measurer, latestPxPerHour, latestCenterHour, crosshair)
         }
     }
 }
@@ -113,6 +146,7 @@ private fun DrawScope.drawRoam(
     measurer: TextMeasurer,
     pxPerHour: Float,
     centerHour: Float,
+    crosshair: ChartPoint?,
 ) {
     val w = size.width
     val h = size.height
@@ -158,6 +192,44 @@ private fun DrawScope.drawRoam(
         measurer,
         TextStyle(fontSize = 8.sp, color = colors.text),
     )
+
+    crosshair?.let { p ->
+        val x = toX(p.h)
+        if (x < 0f || x > w) return@let
+        val y = toY(p.g)
+        drawLine(
+            color = colors.text.copy(alpha = 0.4f),
+            start = Offset(x, 0f),
+            end = Offset(x, h),
+            strokeWidth = 1.dp.toPx(),
+        )
+        drawCircle(colors.text, 3.dp.toPx(), Offset(x, y))
+
+        val epochDay = floor(p.h / 24f).toLong()
+        val date = LocalDate.ofEpochDay(epochDay)
+        val dateLabel =
+            "${date.dayOfMonth.toString().padStart(2, '0')}.${date.monthValue.toString().padStart(2, '0')}"
+        val label = "$dateLabel ${floatToTime(p.h % 24f)} · ${fmt(p.g)}"
+        val text = measurer.measure(
+            AnnotatedString(label),
+            TextStyle(fontSize = 11.sp, color = colors.text),
+        )
+        val padX = 6.dp.toPx()
+        val padY = 4.dp.toPx()
+        val bgW = text.size.width + padX * 2
+        val bgH = text.size.height + padY * 2
+        val bgX = (x - bgW / 2f).coerceIn(0f, w - bgW)
+        drawRoundRect(
+            color = Color.Black.copy(alpha = 0.7f),
+            topLeft = Offset(bgX, 4.dp.toPx()),
+            size = Size(bgW, bgH),
+            cornerRadius = CornerRadius(6.dp.toPx()),
+        )
+        drawText(
+            textLayoutResult = text,
+            topLeft = Offset(bgX + padX, 4.dp.toPx() + padY),
+        )
+    }
 }
 
 private fun dayLabel(date: LocalDate): String =
