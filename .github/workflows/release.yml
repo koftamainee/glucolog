@@ -51,10 +51,16 @@ jobs:
         id: versioncode
         run: echo "code=$(( $(date +%s) / 60 ))" >> "$GITHUB_OUTPUT"
 
+      - name: Decode keystore
+        run: |
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/glucolog-release.jks"
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
       - name: Build signed release APK
         run: ./gradlew :app:assembleRelease -PversionName=${{ inputs.version }} -PversionCode=${{ steps.versioncode.outputs.code }}
         env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PATH: ${{ runner.temp }}/glucolog-release.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}

@@ -7,8 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+val keystorePath = System.getenv("KEYSTORE_PATH")
 val keystoreBase64 = System.getenv("KEYSTORE_BASE64")
-val useReleaseKeystore = !keystoreBase64.isNullOrBlank()
+val useReleaseKeystore = !keystorePath.isNullOrBlank() || !keystoreBase64.isNullOrBlank()
 
 android {
     namespace = "com.koftamainee.glucolog"
@@ -30,8 +31,13 @@ android {
                         ?: (rootProject.layout.buildDirectory.asFile.get().absolutePath + "/keystore")
                 )
                 keystoreDir.mkdirs()
-                val keystoreFile = File(keystoreDir, "glucolog-release.jks")
-                keystoreFile.writeBytes(Base64.getDecoder().decode(keystoreBase64))
+                val keystoreFile = keystorePath?.let { File(it) }
+                    ?: File(keystoreDir, "glucolog-release.jks")
+                        .also { f ->
+                            f.writeBytes(
+                                Base64.getDecoder().decode(keystoreBase64!!.replace("\\s".toRegex(), ""))
+                            )
+                        }
                 storeFile = keystoreFile
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("KEY_ALIAS")
