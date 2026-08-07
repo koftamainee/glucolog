@@ -16,6 +16,12 @@ interface InsulinDao {
     @Query("SELECT * FROM insulin WHERE date = :date ORDER BY h")
     suspend fun get(date: String): List<InsulinEntity>
 
+    @Query("SELECT * FROM insulin ORDER BY date, h")
+    suspend fun getAll(): List<InsulinEntity>
+
+    @Query("SELECT COUNT(*) FROM insulin")
+    suspend fun count(): Int
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(point: InsulinEntity): Long
 
@@ -27,4 +33,7 @@ interface InsulinDao {
 
     @Query("DELETE FROM insulin WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("DELETE FROM insulin")
+    suspend fun deleteAll()
 }

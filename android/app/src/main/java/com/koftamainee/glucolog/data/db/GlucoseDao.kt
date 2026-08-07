@@ -15,6 +15,9 @@ interface GlucoseDao {
     @Query("SELECT * FROM glucose WHERE date = :date ORDER BY h")
     suspend fun get(date: String): List<GlucoseEntity>
 
+    @Query("SELECT * FROM glucose ORDER BY date, h")
+    suspend fun getAll(): List<GlucoseEntity>
+
     @Query("SELECT AVG(g) FROM glucose WHERE date = :date")
     fun observeAvg(date: String): Flow<Float?>
 

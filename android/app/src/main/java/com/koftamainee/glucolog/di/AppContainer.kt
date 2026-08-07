@@ -6,7 +6,7 @@ import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.data.db.AppDatabase
 
 class AppContainer(context: Context) {
-    private val appContext = context.applicationContext
+    val appContext: Context = context.applicationContext
 
     val database: AppDatabase = AppDatabase.build(appContext)
     val dayRepository: DayRepository = DayRepository(database)

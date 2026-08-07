@@ -15,9 +15,18 @@ interface StoolDao {
     @Query("SELECT * FROM stool WHERE date = :date ORDER BY option")
     suspend fun get(date: String): List<StoolEntity>
 
+    @Query("SELECT * FROM stool ORDER BY date, option")
+    suspend fun getAll(): List<StoolEntity>
+
+    @Query("SELECT COUNT(*) FROM stool")
+    suspend fun count(): Int
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(stool: StoolEntity)
 
     @Delete
     suspend fun delete(stool: StoolEntity)
+
+    @Query("DELETE FROM stool")
+    suspend fun deleteAll()
 }

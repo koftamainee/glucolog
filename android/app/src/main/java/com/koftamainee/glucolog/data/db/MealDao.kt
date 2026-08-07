@@ -16,6 +16,12 @@ interface MealDao {
     @Query("SELECT * FROM meal WHERE date = :date AND key = :key")
     suspend fun get(date: String, key: String): MealEntity?
 
+    @Query("SELECT * FROM meal ORDER BY date, key")
+    suspend fun getAll(): List<MealEntity>
+
+    @Query("SELECT COUNT(*) FROM meal")
+    suspend fun count(): Int
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(meal: MealEntity): Long
 
@@ -24,4 +30,7 @@ interface MealDao {
 
     @Upsert
     suspend fun upsert(meal: MealEntity)
+
+    @Query("DELETE FROM meal")
+    suspend fun deleteAll()
 }

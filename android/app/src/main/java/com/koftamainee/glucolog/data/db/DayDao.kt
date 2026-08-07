@@ -15,9 +15,18 @@ interface DayDao {
     @Query("SELECT * FROM day WHERE date = :date")
     suspend fun get(date: String): DayEntity?
 
+    @Query("SELECT * FROM day ORDER BY date")
+    suspend fun getAll(): List<DayEntity>
+
+    @Query("SELECT COUNT(*) FROM day")
+    suspend fun count(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(day: DayEntity)
 
     @Query("DELETE FROM day WHERE date = :date")
     suspend fun delete(date: String)
+
+    @Query("DELETE FROM day")
+    suspend fun deleteAll()
 }

@@ -32,11 +32,11 @@ class DayViewModel(
 
     val dayData: StateFlow<DayData?> = _date
         .flatMapLatest { repo.observeDay(it) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val prevAvg: StateFlow<Float?> = _date
         .flatMapLatest { repo.observePrevAvg(it) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun setDate(date: LocalDate) {
         _date.value = date
