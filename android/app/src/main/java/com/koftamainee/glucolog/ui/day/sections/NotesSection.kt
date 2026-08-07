@@ -1,5 +1,6 @@
 package com.koftamainee.glucolog.ui.day.sections
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,7 +48,7 @@ fun NotesSection(
         onText(DayTextField.CONCLUSIONS, conclusions)
     }
 
-    Column {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         SectionCard(title = "Заметки") {
             OutlinedTextField(
                 value = notes,
