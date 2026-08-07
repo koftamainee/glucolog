@@ -147,11 +147,6 @@
         wireEvents();
         renderAll();
 
-        if (sessionStorage.getItem('glucolog_drive_just_linked')) {
-            sessionStorage.removeItem('glucolog_drive_just_linked');
-            setTimeout(() => Sidebar.open(() => renderAll()), 600);
-        }
-
         Tutorial.start();
     }
 

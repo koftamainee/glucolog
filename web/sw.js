@@ -30,7 +30,6 @@ const STATIC_ASSETS = [
     '/js/calendar.js',
     '/js/sidebar.js',
     '/js/tutorial.js',
-    '/js/drive.js',
     '/js/app.js',
     '/icons/favicon.ico',
     '/icons/favicon-16x16.png',

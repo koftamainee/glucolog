@@ -12,7 +12,6 @@ const Storage = (() => {
     function saveAll(db) {
         try {
             localStorage.setItem(KEY, JSON.stringify(db));
-            Drive.touchLocalModified();
         } catch (e) {
             console.warn('glucolog: failed to save', e);
         }

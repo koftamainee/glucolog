@@ -2,7 +2,6 @@ const Sidebar = (() => {
     let overlay = null;
     let drawer = null;
     let onImportCallback = null;
-    let _driveTimer = null;
     const MEAL_KEYS = ['breakfast1', 'breakfast2', 'lunch', 'snack', 'dinner'];
 
     function build() {
@@ -18,9 +17,6 @@ const Sidebar = (() => {
             dark:   { label: 'Тёмная',    icon: '\uD83C\uDF19' },
             light:  { label: 'Светлая',   icon: '\u2600\uFE0F' },
         };
-
-        const driveLinked = Drive.isLinked();
-        const driveEmail = Drive.getEmail();
 
         drawer.innerHTML = `
             <div class="sidebar-header">
@@ -49,32 +45,6 @@ const Sidebar = (() => {
                 <span class="sidebar-item-icon">+</span>
                 <span>Импорт CSV</span>
             </button>
-
-            <div class="sidebar-section-label">Облако</div>
-
-            ${driveLinked ? `
-            <div class="sidebar-drive-status">
-                <div class="sidebar-drive-header">
-                    <span class="sidebar-drive-name">☁️ Google Drive</span>
-                    <span class="sidebar-drive-badge">● Подключён</span>
-                </div>
-                ${driveEmail ? '<div class="sidebar-drive-email">' + driveEmail + '</div>' : ''}
-                <div class="sidebar-drive-time">
-                    Резервная копия: <span id="driveRelativeTime">${Drive.getRelativeTime() || '-'}</span>
-                </div>
-                <div class="sidebar-drive-actions">
-                    <button class="sidebar-drive-btn" id="sidebarDriveBackup">↑ Создать копию</button>
-                    <button class="sidebar-drive-btn" id="sidebarDriveRestore">↓ Восстановить</button>
-                    <button class="sidebar-drive-btn" id="sidebarDriveUnlink">✕ Отключить</button>
-                    <button class="sidebar-drive-btn" id="sidebarDriveChange">🔄 Сменить</button>
-                </div>
-            </div>
-            ` : `
-            <button class="sidebar-item" id="sidebarDriveLink">
-                <span class="sidebar-item-icon">☁️</span>
-                <span>Google Drive</span>
-            </button>
-            `}
 
             <div class="sidebar-section-label">Вид</div>
 
@@ -127,46 +97,6 @@ const Sidebar = (() => {
                 drawer.querySelector('#sidebarFileInputCSV').click();
             });
 
-        if (driveLinked) {
-            drawer.querySelector('#sidebarDriveBackup')
-                .addEventListener('click', () => {
-                    Drive.backup().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
-                });
-
-            drawer.querySelector('#sidebarDriveRestore')
-                .addEventListener('click', () => {
-                    Drive.restore().then(() => { rebuild(); if (onImportCallback) onImportCallback(); });
-                });
-
-            drawer.querySelector('#sidebarDriveUnlink')
-                .addEventListener('click', () => {
-                    stopDriveTimer();
-                    Drive.unlink();
-                    rebuild();
-                });
-
-            drawer.querySelector('#sidebarDriveChange')
-                .addEventListener('click', () => {
-                    Drive.changeAccount().then(() => {
-                        rebuild();
-                        if (onImportCallback) onImportCallback();
-                    });
-                });
-        } else {
-            drawer.querySelector('#sidebarDriveLink')
-                .addEventListener('click', () => {
-                    // Drive.link() calls getToken() which opens the Google popup.
-                    // We must NOT close the sidebar or use setTimeout before this call —
-                    // browsers treat async gaps / popups opened after setTimeout as
-                    // popup-blocker candidates and block or show an allow/deny prompt.
-                    Drive.link().then(() => {
-                        rebuild();
-                        open(onImportCallback);
-                        if (onImportCallback) onImportCallback();
-                    });
-                });
-        }
-
         drawer.querySelector('#sidebarThemeBtn')
             .addEventListener('click', toggleTheme);
 
@@ -188,7 +118,6 @@ const Sidebar = (() => {
                         const data = JSON.parse(e.target.result);
                         if (typeof data !== 'object' || Array.isArray(data)) throw new Error();
                         localStorage.setItem('glucolog', JSON.stringify(data));
-                        Drive.touchLocalModified();
                         showStatus('Импорт выполнен', true);
                         if (onImportCallback) onImportCallback();
                     } catch {
@@ -207,7 +136,6 @@ const Sidebar = (() => {
                 reader.onload = e => {
                     try {
                         const result = importCSV(e.target.result);
-                        Drive.touchLocalModified();
                         showStatus(`Импортировано ${result} дней`, true);
                         if (onImportCallback) onImportCallback();
                     } catch {
@@ -221,29 +149,11 @@ const Sidebar = (() => {
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') close();
         });
-
-        if (driveLinked) startDriveTimer();
-    }
-
-    function startDriveTimer() {
-        stopDriveTimer();
-        _driveTimer = setInterval(() => {
-            const el = document.getElementById('driveRelativeTime');
-            if (el) el.textContent = Drive.getRelativeTime() || '-';
-        }, 10000);
-    }
-
-    function stopDriveTimer() {
-        if (_driveTimer) {
-            clearInterval(_driveTimer);
-            _driveTimer = null;
-        }
     }
 
     function rebuild() {
         if (!overlay) return;
         const wasVisible = overlay.classList.contains('visible');
-        stopDriveTimer();
         overlay.remove();
         overlay = null;
         drawer = null;
@@ -462,14 +372,12 @@ const Sidebar = (() => {
 
     function open(onImport) {
         onImportCallback = onImport;
-        Drive.setOnImport(onImport);
         if (!overlay) build();
         overlay.classList.add('visible');
         drawer.classList.add('visible');
     }
 
     function close() {
-        stopDriveTimer();
         if (!overlay) return;
         overlay.classList.remove('visible');
         drawer.classList.remove('visible');
