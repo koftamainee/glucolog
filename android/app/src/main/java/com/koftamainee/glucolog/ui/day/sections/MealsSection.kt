@@ -9,12 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +20,9 @@ import androidx.compose.ui.unit.dp
 import com.koftamainee.glucolog.data.db.MealEntity
 import com.koftamainee.glucolog.domain.Constants
 import com.koftamainee.glucolog.domain.MealField
+import com.koftamainee.glucolog.ui.components.DebouncedOutlinedTextField
 import com.koftamainee.glucolog.ui.components.SectionCard
+import com.koftamainee.glucolog.ui.components.TimeField
 
 @Composable
 fun MealsSection(
@@ -58,21 +57,18 @@ private fun MealCard(
                 hunger = meal?.hunger ?: 0,
                 onSelect = { v -> onSetField(MealField.HUNGER, v.toString()) },
             )
-            OutlinedTextField(
+            TimeField(
                 value = meal?.time ?: "",
-                onValueChange = { onSetField(MealField.TIME, it) },
-                label = { Text("Время") },
-                singleLine = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .width(110.dp),
+                onValue = { onSetField(MealField.TIME, it) },
+                label = "Время",
+                modifier = Modifier.weight(1f),
             )
         }
 
-        OutlinedTextField(
+        DebouncedOutlinedTextField(
             value = meal?.food ?: "",
-            onValueChange = { onSetField(MealField.FOOD, it) },
-            placeholder = { Text("Приём пищи") },
+            onCommit = { onSetField(MealField.FOOD, it) },
+            placeholder = "Приём пищи",
             minLines = 2,
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,17 +81,17 @@ private fun MealCard(
                 .padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            OutlinedTextField(
+            DebouncedOutlinedTextField(
                 value = meal?.phys ?: "",
-                onValueChange = { onSetField(MealField.PHYS, it) },
-                placeholder = { Text("Физ. ощущения") },
+                onCommit = { onSetField(MealField.PHYS, it) },
+                placeholder = "Физ. ощущения",
                 minLines = 2,
                 modifier = Modifier.weight(1f),
             )
-            OutlinedTextField(
+            DebouncedOutlinedTextField(
                 value = meal?.emo ?: "",
-                onValueChange = { onSetField(MealField.EMO, it) },
-                placeholder = { Text("Эмоции") },
+                onCommit = { onSetField(MealField.EMO, it) },
+                placeholder = "Эмоции",
                 minLines = 2,
                 modifier = Modifier.weight(1f),
             )

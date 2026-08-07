@@ -35,6 +35,7 @@ import com.koftamainee.glucolog.domain.GlucoseSource
 import com.koftamainee.glucolog.domain.InsulinType
 import com.koftamainee.glucolog.domain.MealField
 import com.koftamainee.glucolog.domain.formatDateLabel
+import com.koftamainee.glucolog.domain.statsOf
 import com.koftamainee.glucolog.ui.day.sections.GlucoseSection
 import com.koftamainee.glucolog.ui.day.sections.InsulinSection
 import com.koftamainee.glucolog.ui.day.sections.JournalSection
@@ -71,6 +72,7 @@ fun DayScreen(viewModel: DayViewModel) {
             )
 
             val day = data
+            val prevAvg = viewModel.prevAvg.collectAsState().value
             if (day == null) {
                 Text(
                     text = "Загрузка…",
@@ -85,6 +87,7 @@ fun DayScreen(viewModel: DayViewModel) {
                 ) {
                     GlucoseSection(
                         data = day,
+                        stats = statsOf(day.glucose.map { it.g }, prevAvg),
                         onAdd = { h, g -> viewModel.addGlucose(h, g, GlucoseSource.MANUAL) },
                     )
                     InsulinSection(

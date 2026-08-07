@@ -39,6 +39,11 @@ class DayRepository(private val db: AppDatabase) {
         }
     }
 
+    fun observePrevAvg(date: LocalDate): Flow<Float?> {
+        val prev = date.minusDays(1)
+        return glucoseDao.observeAvg(DateKeys.key(prev))
+    }
+
     suspend fun getDay(date: LocalDate): DayData {
         val key = DateKeys.key(date)
         return DayData(
@@ -102,7 +107,7 @@ class DayRepository(private val db: AppDatabase) {
                 basal = if (type == InsulinType.BASAL) value else null,
             )
         }
-        insulinDao.insert(updated)
+        insulinDao.upsert(updated)
     }
 
     suspend fun removeInsulin(date: LocalDate, h: Float, type: InsulinType) {
@@ -130,7 +135,7 @@ class DayRepository(private val db: AppDatabase) {
             MealField.PHYS -> current.copy(phys = Constants.blankToNull(value))
             MealField.EMO -> current.copy(emo = Constants.blankToNull(value))
         }
-        mealDao.insert(updated)
+        mealDao.upsert(updated)
     }
 
     suspend fun toggleStool(date: LocalDate, option: String) {

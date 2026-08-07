@@ -24,6 +24,7 @@ fun PrimaryAddButton(
             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Text(
                 text = text,
+                maxLines = 1,
                 modifier = Modifier.padding(start = 4.dp),
             )
         }

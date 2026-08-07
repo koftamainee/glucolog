@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,6 +21,9 @@ interface InsulinDao {
 
     @Update
     suspend fun update(point: InsulinEntity)
+
+    @Upsert
+    suspend fun upsert(point: InsulinEntity)
 
     @Query("DELETE FROM insulin WHERE id = :id")
     suspend fun deleteById(id: Long)

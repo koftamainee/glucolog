@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,6 +14,7 @@ import com.koftamainee.glucolog.domain.DayData
 import com.koftamainee.glucolog.domain.Constants
 import com.koftamainee.glucolog.domain.calcSleepDuration
 import com.koftamainee.glucolog.ui.components.SectionCard
+import com.koftamainee.glucolog.ui.components.TimeField
 
 @Composable
 fun SleepSection(
@@ -30,18 +30,16 @@ fun SleepSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            OutlinedTextField(
+            TimeField(
                 value = start,
-                onValueChange = onStart,
-                label = { Text("Лёг") },
-                singleLine = true,
+                onValue = onStart,
+                label = "Лёг",
                 modifier = Modifier.weight(1f),
             )
-            OutlinedTextField(
+            TimeField(
                 value = end,
-                onValueChange = onEnd,
-                label = { Text("Встал") },
-                singleLine = true,
+                onValue = onEnd,
+                label = "Встал",
                 modifier = Modifier.weight(1f),
             )
         }

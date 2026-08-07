@@ -34,6 +34,10 @@ class DayViewModel(
         .flatMapLatest { repo.observeDay(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    val prevAvg: StateFlow<Float?> = _date
+        .flatMapLatest { repo.observePrevAvg(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
     fun setDate(date: LocalDate) {
         _date.value = date
     }
@@ -55,7 +59,7 @@ class DayViewModel(
 
     fun setSleepEnd(value: String) = launch { repo.setDayField(_date.value) { copy(sleepEnd = value) } }
 
-    fun setStress(value: String) = launch { repo.setDayField(_date.value) { copy(stress = value) } }
+    fun setStress(value: String?) = launch { repo.setDayField(_date.value) { copy(stress = value) } }
 
     fun setText(field: DayTextField, value: String) = launch { repo.setText(_date.value, field, value) }
 

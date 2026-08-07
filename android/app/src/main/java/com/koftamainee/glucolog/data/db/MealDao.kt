@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,4 +21,7 @@ interface MealDao {
 
     @Update
     suspend fun update(meal: MealEntity)
+
+    @Upsert
+    suspend fun upsert(meal: MealEntity)
 }

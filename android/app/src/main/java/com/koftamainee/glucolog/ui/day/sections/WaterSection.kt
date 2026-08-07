@@ -4,7 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -28,16 +28,17 @@ fun WaterSection(
     val filled = data.day?.water ?: 0
 
     SectionCard(title = "Вода") {
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            maxItemsInEachRow = 4,
         ) {
             for (i in 1..Constants.WATER_GLASSES) {
                 val isFilled = i <= filled
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(44.dp)
                         .clickable {
                             val next = if (i <= filled) i - 1 else i
                             onSet(next)
@@ -45,7 +46,7 @@ fun WaterSection(
                     contentAlignment = Alignment.Center,
                 ) {
                     Surface(
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.size(44.dp),
                         shape = CircleShape,
                         color = if (isFilled) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.surface,

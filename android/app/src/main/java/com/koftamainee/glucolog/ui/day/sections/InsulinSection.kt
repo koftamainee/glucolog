@@ -21,6 +21,7 @@ import com.koftamainee.glucolog.domain.currentTimeString
 import com.koftamainee.glucolog.domain.timeToFloat
 import com.koftamainee.glucolog.ui.components.PrimaryAddButton
 import com.koftamainee.glucolog.ui.components.SectionCard
+import com.koftamainee.glucolog.ui.components.TimeField
 
 @Composable
 fun InsulinSection(
@@ -91,17 +92,14 @@ private fun InsulinForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.weight(1f),
         )
-        OutlinedTextField(
+        TimeField(
             value = time,
-            onValueChange = onTime,
-            label = { Text("Время") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.width(120.dp),
+            onValue = onTime,
+            label = "Время",
+            modifier = Modifier.width(96.dp),
         )
         PrimaryAddButton(
             text = "Добавить",
-            modifier = Modifier.width(130.dp),
             onClick = onAdd,
         )
     }

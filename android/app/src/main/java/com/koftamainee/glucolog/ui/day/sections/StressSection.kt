@@ -8,13 +8,13 @@ import com.koftamainee.glucolog.ui.components.SectionCard
 @Composable
 fun StressSection(
     selected: String?,
-    onSelect: (String) -> Unit,
+    onSelect: (String?) -> Unit,
 ) {
     SectionCard(title = "Стресс") {
         ChipRow(
             options = Constants.STRESS_OPTS,
             selected = selected,
-            onSelect = onSelect,
+            onSelect = { opt -> onSelect(if (selected == opt) null else opt) },
         )
     }
 }
