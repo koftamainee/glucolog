@@ -251,13 +251,12 @@ internal fun DrawScope.drawBasalMarkers(
     valueStyle: TextStyle,
 ) {
     basal.forEach { p ->
-        val x = toX(p.h)
-        val y = toY(p.g.coerceIn(MIN_G, MAX_G))
-        drawCircle(color, 3.5.dp.toPx(), Offset(x, y))
+        val center = Offset(toX(p.h), toY(MEAL_G))
+        drawCircle(color, 3.5.dp.toPx(), center)
         val text = measurer.measure(AnnotatedString(fmt(p.g)), valueStyle)
         drawText(
             textLayoutResult = text,
-            topLeft = Offset(x + 5.dp.toPx(), y - 2.dp.toPx() - text.size.height),
+            topLeft = Offset(center.x + 5.dp.toPx(), center.y - text.size.height / 2f),
         )
     }
 }

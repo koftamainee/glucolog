@@ -6,9 +6,10 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -16,7 +17,8 @@ import com.koftamainee.glucolog.R
 
 class XdripMonitorService : Service() {
 
-    private var receiver: XdripBroadcastReceiver? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var watchdogActive = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -24,7 +26,9 @@ class XdripMonitorService : Service() {
         super.onCreate()
         createChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
-        registerXdripReceiver()
+        lastBgReceivedMs = System.currentTimeMillis()
+        startWatchdog()
+        XdripBroadcast.register(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -39,21 +43,30 @@ class XdripMonitorService : Service() {
     }
 
     override fun onDestroy() {
-        receiver?.let { unregisterReceiver(it) }
-        receiver = null
+        stopWatchdog()
         super.onDestroy()
     }
 
-    private fun registerXdripReceiver() {
-        val r = XdripBroadcastReceiver()
-        val filter = IntentFilter(XdripBroadcastReceiver.ACTION_BG_ESTIMATE)
-        ContextCompat.registerReceiver(
-            this,
-            r,
-            filter,
-            ContextCompat.RECEIVER_EXPORTED,
-        )
-        receiver = r
+    private fun startWatchdog() {
+        watchdogActive = true
+        handler.postDelayed(watchdogTick, WATCHDOG_INTERVAL_MS)
+    }
+
+    private fun stopWatchdog() {
+        watchdogActive = false
+        handler.removeCallbacksAndMessages(null)
+    }
+
+    private val watchdogTick = object : Runnable {
+        override fun run() {
+            if (!watchdogActive) return
+            val idle = System.currentTimeMillis() - lastBgReceivedMs
+            if (idle > IDLE_LIMIT_MS) {
+                Log.d(TAG, "no xdrip bg for ${idle / 1000}s, re-registering")
+                XdripBroadcast.register(applicationContext)
+            }
+            handler.postDelayed(this, WATCHDOG_INTERVAL_MS)
+        }
     }
 
     private fun createChannel() {
@@ -83,6 +96,15 @@ class XdripMonitorService : Service() {
         private const val CHANNEL_ID = "xdrip_monitor"
         private const val NOTIFICATION_ID = 1
         private const val ACTION_RESTART = "com.koftamainee.glucolog.action.RESTART_MONITOR"
+        private const val WATCHDOG_INTERVAL_MS = 60_000L
+        private const val IDLE_LIMIT_MS = 10 * 60_000L
+
+        @Volatile
+        var lastBgReceivedMs: Long = 0L
+
+        fun onBgReceived() {
+            lastBgReceivedMs = System.currentTimeMillis()
+        }
 
         fun start(context: Context) {
             val intent = Intent(context, XdripMonitorService::class.java)

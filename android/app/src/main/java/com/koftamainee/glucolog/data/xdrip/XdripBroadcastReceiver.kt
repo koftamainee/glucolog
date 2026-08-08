@@ -15,10 +15,36 @@ import java.time.ZoneId
 class XdripBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "onReceive action=${intent.action}")
-        if (intent.action != ACTION_BG_ESTIMATE) return
-        val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, Double.NaN)
-        val timeMs = intent.getLongExtra(EXTRA_TIME, -1L)
+        if (intent.action != XdripBroadcast.ACTION_WATCH_COMMUNICATION_SENDER) return
+        val function = intent.getStringExtra(XdripBroadcast.INTENT_FUNCTION_KEY) ?: return
+
+        if (function != XdripBroadcast.CMD_START &&
+            intent.getPackage() != context.packageName
+        ) {
+            return
+        }
+
+        Log.d(TAG, "onReceive function=$function")
+        when (function) {
+            XdripBroadcast.CMD_START -> XdripBroadcast.register(context)
+
+            XdripBroadcast.CMD_UPDATE_BG, XdripBroadcast.CMD_UPDATE_BG_FORCE ->
+                handleBg(context, intent)
+
+            XdripBroadcast.CMD_REPLY_MSG -> {
+                val code = intent.getStringExtra(XdripBroadcast.INTENT_REPLY_CODE)
+                if (code == XdripBroadcast.REPLY_CODE_NOT_REGISTERED ||
+                    code == XdripBroadcast.REPLY_CODE_ERROR
+                ) {
+                    XdripBroadcast.register(context)
+                }
+            }
+        }
+    }
+
+    private fun handleBg(context: Context, intent: Intent) {
+        val mgdl = intent.getDoubleExtra(XdripBroadcast.BG_VALUE_MGDL, Double.NaN)
+        val timeMs = intent.getLongExtra(XdripBroadcast.BG_TIMESTAMP, -1L)
         if (mgdl.isNaN() || timeMs <= 0L) return
 
         val local = Instant.ofEpochMilli(timeMs).atZone(ZoneId.systemDefault())
@@ -26,13 +52,14 @@ class XdripBroadcastReceiver : BroadcastReceiver() {
         val date = local.toLocalDate()
         val h = local.hour + local.minute / 60f
 
-        Log.d(TAG, "xdrip bg received: ${date} ${h} -> ${mmol}")
+        Log.d(TAG, "xdrip bg received: $date ${h} -> ${mmol}")
         val app = context.applicationContext as GlucologApp
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 app.container.dayRepository.addGlucose(date, h, mmol, GlucoseSource.XDRIP)
                 app.container.settingsDataStore.setXdripConnected(true)
+                XdripMonitorService.onBgReceived()
             } finally {
                 pendingResult.finish()
             }
@@ -40,9 +67,6 @@ class XdripBroadcastReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const val ACTION_BG_ESTIMATE = "com.eveningoutpost.dexdrip.BgEstimate"
-        private const val EXTRA_BG_ESTIMATE = "com.eveningoutpost.dexdrip.Extras.BgEstimate"
-        private const val EXTRA_TIME = "com.eveningoutpost.dexdrip.Extras.Time"
         private const val MGDL_PER_MMOL = 18.016
         private const val TAG = "XdripReceiver"
     }

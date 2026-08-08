@@ -35,7 +35,7 @@ data class RoamModel(
                 day.meals.forEach { m ->
                     m.time?.let { t ->
                         timeToFloat(t)?.let { hf ->
-                            meals += ChartMeal(hour(date, hf) + MEAL_CHART_SHIFT_HOURS, m.carbs)
+                            meals += ChartMeal(hour(date, hf), m.carbs)
                         }
                     }
                 }
