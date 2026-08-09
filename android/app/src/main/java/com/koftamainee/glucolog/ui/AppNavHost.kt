@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +32,8 @@ import com.koftamainee.glucolog.di.AppContainer
 import com.koftamainee.glucolog.domain.DateKeys
 import com.koftamainee.glucolog.ui.day.DayScreen
 import com.koftamainee.glucolog.ui.day.DayViewModel
+import com.koftamainee.glucolog.ui.bolus.BolusScreen
+import com.koftamainee.glucolog.ui.bolus.BolusViewModel
 import com.koftamainee.glucolog.ui.importexport.ImportExportScreen
 import com.koftamainee.glucolog.ui.importexport.ImportExportViewModel
 import com.koftamainee.glucolog.ui.roam.RoamScreen
@@ -82,6 +85,10 @@ fun AppNavHost(container: AppContainer) {
                         onOpenChartSettings = { navController.navigate("chart-settings") },
                     )
                 }
+                composable("bolus") {
+                    val vm: BolusViewModel = viewModel(factory = BolusViewModel.factory(container))
+                    BolusScreen(viewModel = vm)
+                }
                 composable("chart-settings") {
                     val vm: ChartSettingsViewModel = viewModel(factory = ChartSettingsViewModel.factory(container))
                     ChartSettingsScreen(
@@ -112,6 +119,7 @@ private fun BottomNav(navController: NavHostController) {
 
     val tabs = listOf(
         BottomTab("day", "День", Icons.Filled.DateRange),
+        BottomTab("bolus", "Калькулятор", Icons.Filled.Calculate),
         BottomTab("io", "Настройки", Icons.AutoMirrored.Filled.List),
     )
 

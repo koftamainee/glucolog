@@ -2,6 +2,7 @@ package com.koftamainee.glucolog.di
 
 import android.content.Context
 import com.koftamainee.glucolog.data.DayRepository
+import com.koftamainee.glucolog.data.ProductRepository
 import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.data.db.AppDatabase
 import com.koftamainee.glucolog.data.xdrip.XdripStatusProvider
@@ -16,4 +17,5 @@ class AppContainer(context: Context) {
     val xdripWebClient: XdripWebClient = XdripWebClient()
     val xdripStatusProvider: XdripStatusProvider =
         XdripStatusProvider(dayRepository, settingsDataStore)
+    val productRepository: ProductRepository = ProductRepository(database)
 }

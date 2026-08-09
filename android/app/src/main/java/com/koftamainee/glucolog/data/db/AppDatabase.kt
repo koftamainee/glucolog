@@ -14,8 +14,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         InsulinEntity::class,
         MealEntity::class,
         StoolEntity::class,
+        ProductEntity::class,
     ],
-    version = 2,
+    version = 5,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -24,6 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun insulinDao(): InsulinDao
     abstract fun mealDao(): MealDao
     abstract fun stoolDao(): StoolDao
+    abstract fun foodDao(): FoodDao
 
     companion object {
         private const val NAME = "glucolog.db"
@@ -49,13 +51,58 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `product` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`name` TEXT NOT NULL, `kcal` REAL NOT NULL, " +
+                        "`proteins` REAL NOT NULL, `fats` REAL NOT NULL, `carbs` REAL NOT NULL, " +
+                        "`portionMass` INTEGER NOT NULL, `note` TEXT, `source` TEXT NOT NULL)"
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `recipe` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL)"
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `recipe_ingredient` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`recipeId` INTEGER NOT NULL, `productId` INTEGER NOT NULL, " +
+                        "`mass` INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_recipe_ingredient_recipeId_productId` " +
+                        "ON `recipe_ingredient` (`recipeId`, `productId`)"
+                )
+            }
+        }
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS `recipe`")
+                db.execSQL("DROP TABLE IF EXISTS `recipe_ingredient`")
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `product` ADD COLUMN `nameLower` TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE `product` ADD COLUMN `hidden` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("UPDATE `product` SET `nameLower` = lower(`name`)")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_product_nameLower` " +
+                        "ON `product` (`nameLower`)"
+                )
+            }
+        }
+
         @Volatile
         private var instance: AppDatabase? = null
 
         fun build(context: Context): AppDatabase =
             instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(context, AppDatabase::class.java, NAME)
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                     .also { instance = it }
             }

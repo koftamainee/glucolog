@@ -48,6 +48,7 @@ class SettingsDataStore(private val context: Context) {
     private val markerBasalKey = booleanPreferencesKey("marker_line_basal")
     private val targetLoKey = floatPreferencesKey("target_range_lo")
     private val targetHiKey = floatPreferencesKey("target_range_hi")
+    private val targetGlucoseKey = floatPreferencesKey("target_glucose")
 
     val markerLines: Flow<MarkerLineSettings> =
         context.dataStore.data.map { prefs ->
@@ -94,6 +95,13 @@ class SettingsDataStore(private val context: Context) {
 
     suspend fun setTargetHi(value: Float) {
         context.dataStore.edit { prefs -> prefs[targetHiKey] = value }
+    }
+
+    val targetGlucose: Flow<Float> =
+        context.dataStore.data.map { prefs -> prefs[targetGlucoseKey] ?: 5f }
+
+    suspend fun setTargetGlucose(value: Float) {
+        context.dataStore.edit { prefs -> prefs[targetGlucoseKey] = value }
     }
 
     val themeMode: Flow<ThemeMode> =
