@@ -4,6 +4,7 @@ import com.koftamainee.glucolog.domain.BolusCalculator
 import com.koftamainee.glucolog.domain.FoodNutrients
 import com.koftamainee.glucolog.domain.FoodPortion
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -36,6 +37,22 @@ class BolusCalculatorTest {
     fun derivedFactors_defaultDose20() {
         assertEquals(0.48f, BolusCalculator.carbohydrateCoefficient(20f), 0.0001f)
         assertEquals(5f, BolusCalculator.insulinSensitivityFactor(20f), 0.0001f)
+    }
+
+    @Test
+    fun averageDailyDose_averagesNonZeroDays() {
+        assertEquals(30f, BolusCalculator.averageDailyDose(listOf(20f, 40f, 30f))!!, 0.0001f)
+    }
+
+    @Test
+    fun averageDailyDose_skipsZeroDays() {
+        assertEquals(25f, BolusCalculator.averageDailyDose(listOf(0f, 25f, 0f))!!, 0.0001f)
+    }
+
+    @Test
+    fun averageDailyDose_nullWhenNoData() {
+        assertNull(BolusCalculator.averageDailyDose(listOf(0f, 0f)))
+        assertNull(BolusCalculator.averageDailyDose(emptyList()))
     }
 
     @Test

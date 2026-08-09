@@ -96,10 +96,18 @@ class BolusViewModel(
             dayRepo.observeDay(LocalDate.now()).collect {
                 refreshFactors()
                 refreshActualGlucose()
+                refreshActiveInsulin()
             }
         }
         viewModelScope.launch {
             _state.update { it.copy(activeInsulin = format(computeActiveInsulin())) }
+        }
+        viewModelScope.launch {
+            while (true) {
+                delay(60_000)
+                refreshFactors()
+                refreshActiveInsulin()
+            }
         }
     }
 
@@ -392,17 +400,13 @@ class BolusViewModel(
 
     private suspend fun computeTdd(): Float? {
         val today = LocalDate.now()
-        var total = 0f
-        var daysWithBolus = 0
-        for (i in 0 until 7) {
-            val day = dayRepo.getDay(today.minusDays(i.toLong()))
-            val sum = day.insulin.fold(0f) { acc, point -> acc + (point.bolus ?: 0f) }
-            if (sum > 0f) {
-                total += sum
-                daysWithBolus++
-            }
+        val doses = (0 until 7).map { i ->
+            dayRepo.getDay(today.minusDays(i.toLong()))
+                .insulin.fold(0f) { acc, point ->
+                    acc + (point.bolus ?: 0f) + (point.basal ?: 0f)
+                }
         }
-        return if (daysWithBolus == 0) null else total / daysWithBolus
+        return BolusCalculator.averageDailyDose(doses)
     }
 
     private fun refreshActiveInsulin() {

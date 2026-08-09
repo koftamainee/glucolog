@@ -33,6 +33,11 @@ object BolusCalculator {
     fun insulinSensitivityFactor(totalDailyDose: Float): Float =
         if (totalDailyDose <= 0f) 0f else 100f / totalDailyDose
 
+    fun averageDailyDose(dailyDoses: List<Float>): Float? {
+        val days = dailyDoses.filter { it > 0f }
+        return if (days.isEmpty()) null else days.sum() / days.size
+    }
+
     fun breadUnits(carbsPer100: Float, mass: Float): Float =
         round2(carbsPer100 * mass / 100f / 12f)
 
