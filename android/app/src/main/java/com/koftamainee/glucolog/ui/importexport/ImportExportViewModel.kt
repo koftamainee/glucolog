@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.koftamainee.glucolog.data.DayRepository
+import com.koftamainee.glucolog.data.SettingsDataStore
+import com.koftamainee.glucolog.data.ThemeMode
 import com.koftamainee.glucolog.data.importexport.CsvCodec
 import com.koftamainee.glucolog.data.importexport.FileOps
 import com.koftamainee.glucolog.data.importexport.ImportedFile
@@ -14,7 +16,9 @@ import com.koftamainee.glucolog.data.importexport.ImportCoordinator
 import com.koftamainee.glucolog.data.importexport.JsonCodec
 import com.koftamainee.glucolog.di.AppContainer
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 enum class ExportKind { JSON, CSV }
@@ -22,6 +26,7 @@ enum class ExportKind { JSON, CSV }
 class ImportExportViewModel(
     private val repo: DayRepository,
     private val appContext: Context,
+    private val settings: SettingsDataStore,
 ) : ViewModel() {
 
     private val _busy = MutableStateFlow(false)
@@ -35,6 +40,11 @@ class ImportExportViewModel(
 
     private val _needStrategy = MutableStateFlow(false)
     val needStrategy: StateFlow<Boolean> = _needStrategy
+
+    val themeMode: StateFlow<ThemeMode> = settings.themeMode
+        .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.SYSTEM)
+
+    fun setThemeMode(mode: ThemeMode) = launch { settings.setThemeMode(mode) }
 
     fun export(kind: ExportKind, uri: Uri) {
         viewModelScope.launch {
@@ -104,10 +114,18 @@ class ImportExportViewModel(
         else -> "дней"
     }
 
+    private fun launch(block: suspend () -> Unit) {
+        viewModelScope.launch { block() }
+    }
+
     companion object {
         fun factory(container: AppContainer) = viewModelFactory {
             initializer {
-                ImportExportViewModel(container.dayRepository, container.appContext)
+                ImportExportViewModel(
+                    container.dayRepository,
+                    container.appContext,
+                    container.settingsDataStore,
+                )
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +32,11 @@ data class MarkerLineSettings(
     val basal: Boolean = true,
 )
 
+data class TargetRangeSettings(
+    val lo: Float = 4f,
+    val hi: Float = 8f,
+)
+
 class SettingsDataStore(private val context: Context) {
 
     private val themeKey = stringPreferencesKey("theme_mode")
@@ -40,6 +46,8 @@ class SettingsDataStore(private val context: Context) {
     private val markerBolusStartKey = booleanPreferencesKey("marker_line_bolus_start")
     private val markerBolusEndKey = booleanPreferencesKey("marker_line_bolus_end")
     private val markerBasalKey = booleanPreferencesKey("marker_line_basal")
+    private val targetLoKey = floatPreferencesKey("target_range_lo")
+    private val targetHiKey = floatPreferencesKey("target_range_hi")
 
     val markerLines: Flow<MarkerLineSettings> =
         context.dataStore.data.map { prefs ->
@@ -70,6 +78,22 @@ class SettingsDataStore(private val context: Context) {
 
     suspend fun setMarkerLineBasal(value: Boolean) {
         context.dataStore.edit { prefs -> prefs[markerBasalKey] = value }
+    }
+
+    val targetRange: Flow<TargetRangeSettings> =
+        context.dataStore.data.map { prefs ->
+            TargetRangeSettings(
+                lo = prefs[targetLoKey] ?: 4f,
+                hi = prefs[targetHiKey] ?: 8f,
+            )
+        }
+
+    suspend fun setTargetLo(value: Float) {
+        context.dataStore.edit { prefs -> prefs[targetLoKey] = value }
+    }
+
+    suspend fun setTargetHi(value: Float) {
+        context.dataStore.edit { prefs -> prefs[targetHiKey] = value }
     }
 
     val themeMode: Flow<ThemeMode> =

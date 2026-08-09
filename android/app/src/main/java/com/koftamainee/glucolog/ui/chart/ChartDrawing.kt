@@ -117,11 +117,13 @@ internal fun DrawScope.drawRangeBand(
     colors: ChartColors,
     toY: (Float) -> Float,
     w: Float,
+    lo: Float = RANGE_LO,
+    hi: Float = RANGE_HI,
 ) {
     drawRect(
         color = colors.range,
-        topLeft = Offset(0f, toY(RANGE_HI)),
-        size = Size(w, toY(RANGE_LO) - toY(RANGE_HI)),
+        topLeft = Offset(0f, toY(hi)),
+        size = Size(w, toY(lo) - toY(hi)),
     )
 }
 

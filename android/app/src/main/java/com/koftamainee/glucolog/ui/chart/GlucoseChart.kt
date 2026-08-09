@@ -29,6 +29,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.koftamainee.glucolog.data.MarkerLineSettings
+import com.koftamainee.glucolog.data.TargetRangeSettings
 import com.koftamainee.glucolog.domain.ChartModel
 import com.koftamainee.glucolog.domain.ChartPoint
 import com.koftamainee.glucolog.domain.floatToTime
@@ -37,6 +38,7 @@ import com.koftamainee.glucolog.domain.floatToTime
 fun GlucoseChart(
     chart: ChartModel,
     markerLines: MarkerLineSettings,
+    targetRange: TargetRangeSettings,
     modifier: Modifier = Modifier,
 ) {
     val dark = isSystemInDarkTheme()
@@ -71,7 +73,7 @@ fun GlucoseChart(
             },
     ) {
         Canvas(modifier = Modifier.fillMaxWidth().height(chartHeight)) {
-            drawChart(chart, colors, measurer, markerLines, crosshair)
+            drawChart(chart, colors, measurer, markerLines, targetRange, crosshair)
         }
     }
 }
@@ -81,6 +83,7 @@ private fun DrawScope.drawChart(
     colors: ChartColors,
     measurer: TextMeasurer,
     markerLines: MarkerLineSettings,
+    targetRange: TargetRangeSettings,
     crosshair: ChartPoint?,
 ) {
     val w = size.width
@@ -90,7 +93,7 @@ private fun DrawScope.drawChart(
 
     drawYGrid(colors, measurer, toY, h)
     drawXGrid(colors, toX, h, (0..24 step 6).map { it.toFloat() })
-    drawRangeBand(colors, toY, w)
+    drawRangeBand(colors, toY, w, targetRange.lo, targetRange.hi)
 
     val usedLabels = mutableListOf<Rect>()
     if (markerLines.manual) {

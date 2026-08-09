@@ -32,6 +32,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.koftamainee.glucolog.data.MarkerLineSettings
+import com.koftamainee.glucolog.data.TargetRangeSettings
 import com.koftamainee.glucolog.domain.ChartPoint
 import com.koftamainee.glucolog.domain.RoamModel
 import com.koftamainee.glucolog.domain.floatToTime
@@ -64,6 +65,7 @@ fun RoamChart(
     centerHour: Float,
     pxPerHour: Float,
     markerLines: MarkerLineSettings,
+    targetRange: TargetRangeSettings,
     onCenterHour: (Float) -> Unit,
     onPxPerHour: (Float) -> Unit,
     modifier: Modifier = Modifier,
@@ -140,7 +142,7 @@ fun RoamChart(
                     }
                 },
         ) {
-            drawRoam(latestModel, colors, measurer, latestPxPerHour, latestCenterHour, markerLines, crosshair)
+            drawRoam(latestModel, colors, measurer, latestPxPerHour, latestCenterHour, markerLines, targetRange, crosshair)
         }
     }
 }
@@ -152,6 +154,7 @@ private fun DrawScope.drawRoam(
     pxPerHour: Float,
     centerHour: Float,
     markerLines: MarkerLineSettings,
+    targetRange: TargetRangeSettings,
     crosshair: ChartPoint?,
 ) {
     val w = size.width
@@ -181,7 +184,7 @@ private fun DrawScope.drawRoam(
         }
     }
 
-    drawRangeBand(colors, toY, w)
+    drawRangeBand(colors, toY, w, targetRange.lo, targetRange.hi)
 
     val usedLabels = mutableListOf<Rect>()
     if (markerLines.manual) {

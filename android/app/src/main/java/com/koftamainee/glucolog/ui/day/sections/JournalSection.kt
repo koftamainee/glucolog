@@ -37,6 +37,8 @@ private data class LogEntry(
 @Composable
 fun JournalSection(
     data: DayData,
+    targetLo: Float,
+    targetHi: Float,
     onDeleteGlucose: (Long) -> Unit,
     onDeleteInsulin: (Float, InsulinType) -> Unit,
 ) {
@@ -64,7 +66,7 @@ fun JournalSection(
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 entries.forEach { e ->
-                    JournalRow(e = e, onDelete = { pendingDelete = e })
+                    JournalRow(e = e, targetLo = targetLo, targetHi = targetHi, onDelete = { pendingDelete = e })
                 }
             }
         }
@@ -94,6 +96,8 @@ fun JournalSection(
 @Composable
 private fun JournalRow(
     e: LogEntry,
+    targetLo: Float,
+    targetHi: Float,
     onDelete: () -> Unit,
 ) {
     val (label, valueText, color) = when (e.type) {
@@ -101,8 +105,8 @@ private fun JournalRow(
             "Глюкоза",
             "%.1f ммоль/л".format(e.value),
             when {
-                e.value < 4f -> MaterialTheme.colorScheme.error
-                e.value > 10f -> MaterialTheme.colorScheme.error
+                e.value < targetLo -> MaterialTheme.colorScheme.error
+                e.value > targetHi -> MaterialTheme.colorScheme.error
                 else -> MaterialTheme.colorScheme.primary
             },
         )

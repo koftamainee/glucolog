@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.koftamainee.glucolog.data.ThemeMode
 import java.time.LocalDate
 
 @Composable
@@ -38,6 +41,7 @@ fun ImportExportScreen(
     val message by viewModel.message.collectAsState()
     val pending by viewModel.pending.collectAsState()
     val needStrategy by viewModel.needStrategy.collectAsState()
+    val themeMode by viewModel.themeMode.collectAsState()
 
     val jsonExportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -66,6 +70,28 @@ fun ImportExportScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text("Настройки", style = MaterialTheme.typography.titleLarge)
+
+            Text("Тема", style = MaterialTheme.typography.titleMedium)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ThemeMode.entries.forEach { mode ->
+                    FilterChip(
+                        selected = themeMode == mode,
+                        onClick = { viewModel.setThemeMode(mode) },
+                        label = {
+                            Text(
+                                when (mode) {
+                                    ThemeMode.SYSTEM -> "Системная"
+                                    ThemeMode.DARK -> "Тёмная"
+                                    ThemeMode.LIGHT -> "Светлая"
+                                }
+                            )
+                        },
+                    )
+                }
+            }
 
             Text("График", style = MaterialTheme.typography.titleMedium)
             Button(

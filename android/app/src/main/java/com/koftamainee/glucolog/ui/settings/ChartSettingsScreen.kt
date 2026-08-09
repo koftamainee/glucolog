@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -29,7 +30,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.koftamainee.glucolog.ui.components.DebouncedOutlinedTextField
 import com.koftamainee.glucolog.ui.theme.ChartBasal
 import com.koftamainee.glucolog.ui.theme.ChartBasalDark
 import com.koftamainee.glucolog.ui.theme.ChartBolus
@@ -45,6 +48,7 @@ fun ChartSettingsScreen(
     onBack: () -> Unit,
 ) {
     val markerLines by viewModel.markerLines.collectAsState()
+    val targetRange by viewModel.targetRange.collectAsState()
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
         Column(
@@ -103,9 +107,42 @@ fun ChartSettingsScreen(
                 dotColor = ChartBasal,
                 dotColorDark = ChartBasalDark,
             )
+
+            Text(
+                text = "Целевой диапазон",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                DebouncedOutlinedTextField(
+                    value = fmt(targetRange.lo),
+                    onCommit = { value ->
+                        value.toFloatOrNull()?.let { v -> viewModel.setTargetLo(v) }
+                    },
+                    placeholder = "Нижняя",
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.weight(1f),
+                )
+                DebouncedOutlinedTextField(
+                    value = fmt(targetRange.hi),
+                    onCommit = { value ->
+                        value.toFloatOrNull()?.let { v -> viewModel.setTargetHi(v) }
+                    },
+                    placeholder = "Верхняя",
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }
+
+@Composable
+private fun fmt(v: Float): String = String.format(java.util.Locale.ROOT, "%.1f", v)
 
 @Composable
 private fun MarkerLineSwitchRow(

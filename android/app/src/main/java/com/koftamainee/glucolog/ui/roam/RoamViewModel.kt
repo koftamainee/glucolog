@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.koftamainee.glucolog.data.DayRepository
 import com.koftamainee.glucolog.data.MarkerLineSettings
 import com.koftamainee.glucolog.data.SettingsDataStore
+import com.koftamainee.glucolog.data.TargetRangeSettings
 import com.koftamainee.glucolog.di.AppContainer
 import com.koftamainee.glucolog.domain.RoamModel
 import java.time.LocalDate
@@ -41,6 +42,9 @@ class RoamViewModel(
 
     val markerLines: StateFlow<MarkerLineSettings> = settings.markerLines
         .stateIn(viewModelScope, SharingStarted.Eagerly, MarkerLineSettings())
+
+    val targetRange: StateFlow<TargetRangeSettings> = settings.targetRange
+        .stateIn(viewModelScope, SharingStarted.Eagerly, TargetRangeSettings())
 
     private var windowStart: LocalDate = openedDate.minusDays(INITIAL_RANGE_DAYS)
     private var windowEnd: LocalDate = openedDate.plusDays(INITIAL_RANGE_DAYS)

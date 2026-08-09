@@ -16,15 +16,15 @@ data class DayStats(
     enum class Trend { UP, DOWN, FLAT }
 }
 
-fun statsOf(points: List<Float>, prevAvg: Float?): DayStats? {
+fun statsOf(points: List<Float>, prevAvg: Float?, lo: Float = 4f, hi: Float = 8f): DayStats? {
     if (points.isEmpty()) return null
     val n = points.size
     val min = points.min()
     val max = points.max()
     val avg = points.sum() / n
     val sd = sqrt(points.sumOf { ((it - avg) * (it - avg)).toDouble() } / n).toFloat()
-    val hypo = countZones(points, 4f, above = false)
-    val hyper = countZones(points, 8f, above = true)
+    val hypo = countZones(points, lo, above = false)
+    val hyper = countZones(points, hi, above = true)
     val trend = prevAvg?.let { prev ->
         val diff = avg - prev
         when {
