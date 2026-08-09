@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.koftamainee.glucolog.data.MarkerLevelSettings
 import com.koftamainee.glucolog.data.MarkerLineSettings
 import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.data.TargetRangeSettings
@@ -24,6 +25,9 @@ class ChartSettingsViewModel(
     val targetRange: StateFlow<TargetRangeSettings> = settings.targetRange
         .stateIn(viewModelScope, SharingStarted.Eagerly, TargetRangeSettings())
 
+    val markerLevels: StateFlow<MarkerLevelSettings> = settings.markerLevels
+        .stateIn(viewModelScope, SharingStarted.Eagerly, MarkerLevelSettings())
+
     fun setMarkerLineManual(value: Boolean) = launch { settings.setMarkerLineManual(value) }
 
     fun setMarkerLineMeal(value: Boolean) = launch { settings.setMarkerLineMeal(value) }
@@ -37,6 +41,10 @@ class ChartSettingsViewModel(
     fun setTargetLo(value: Float) = launch { settings.setTargetLo(value) }
 
     fun setTargetHi(value: Float) = launch { settings.setTargetHi(value) }
+
+    fun setMarkerLevelBasal(value: Float) = launch { settings.setMarkerLevelBasal(value) }
+
+    fun setMarkerLevelMeal(value: Float) = launch { settings.setMarkerLevelMeal(value) }
 
     private fun launch(block: suspend () -> Unit) {
         viewModelScope.launch { block() }

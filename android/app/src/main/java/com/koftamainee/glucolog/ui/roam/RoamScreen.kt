@@ -40,6 +40,7 @@ fun RoamScreen(
 ) {
     val model by viewModel.model.collectAsState()
     val markerLines by viewModel.markerLines.collectAsState()
+    val markerLevels by viewModel.markerLevels.collectAsState()
     val targetRange by viewModel.targetRange.collectAsState()
     var pxPerHour by remember { mutableStateOf(INITIAL_PX_PER_HOUR) }
     var centerHour by remember { mutableStateOf(viewModel.openedCenterHour) }
@@ -109,6 +110,7 @@ fun RoamScreen(
                 centerHour = centerHour,
                 pxPerHour = pxPerHour,
                 markerLines = markerLines,
+                markerLevels = markerLevels,
                 targetRange = targetRange,
                 onCenterHour = { centerHour = it },
                 onPxPerHour = { pxPerHour = it },

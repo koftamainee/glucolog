@@ -49,6 +49,7 @@ fun ChartSettingsScreen(
 ) {
     val markerLines by viewModel.markerLines.collectAsState()
     val targetRange by viewModel.targetRange.collectAsState()
+    val markerLevels by viewModel.markerLevels.collectAsState()
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
         Column(
@@ -137,6 +138,43 @@ fun ChartSettingsScreen(
                     modifier = Modifier.weight(1f),
                 )
             }
+
+            Text(
+                text = "Уровень отображения на графике",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                DebouncedOutlinedTextField(
+                    value = fmt(markerLevels.basal),
+                    onCommit = { value ->
+                        value.toFloatOrNull()?.let { v -> viewModel.setMarkerLevelBasal(v) }
+                    },
+                    label = "Базальный",
+                    placeholder = "Базальный",
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.weight(1f),
+                )
+                DebouncedOutlinedTextField(
+                    value = fmt(markerLevels.meal),
+                    onCommit = { value ->
+                        value.toFloatOrNull()?.let { v -> viewModel.setMarkerLevelMeal(v) }
+                    },
+                    label = "Приёмы пищи",
+                    placeholder = "Приёмы пищи",
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Text(
+                text = "Уровень в мм/л, на котором точки базального инсулина и приёмов пищи рисуются на графике.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

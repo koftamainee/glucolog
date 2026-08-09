@@ -31,6 +31,7 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.koftamainee.glucolog.data.MarkerLevelSettings
 import com.koftamainee.glucolog.data.MarkerLineSettings
 import com.koftamainee.glucolog.data.TargetRangeSettings
 import com.koftamainee.glucolog.domain.ChartPoint
@@ -65,6 +66,7 @@ fun RoamChart(
     centerHour: Float,
     pxPerHour: Float,
     markerLines: MarkerLineSettings,
+    markerLevels: MarkerLevelSettings,
     targetRange: TargetRangeSettings,
     onCenterHour: (Float) -> Unit,
     onPxPerHour: (Float) -> Unit,
@@ -142,7 +144,7 @@ fun RoamChart(
                     }
                 },
         ) {
-            drawRoam(latestModel, colors, measurer, latestPxPerHour, latestCenterHour, markerLines, targetRange, crosshair)
+            drawRoam(latestModel, colors, measurer, latestPxPerHour, latestCenterHour, markerLines, markerLevels, targetRange, crosshair)
         }
     }
 }
@@ -154,6 +156,7 @@ private fun DrawScope.drawRoam(
     pxPerHour: Float,
     centerHour: Float,
     markerLines: MarkerLineSettings,
+    markerLevels: MarkerLevelSettings,
     targetRange: TargetRangeSettings,
     crosshair: ChartPoint?,
 ) {
@@ -212,7 +215,7 @@ private fun DrawScope.drawRoam(
     val valueStyle = TextStyle(fontSize = 9.sp, color = colors.text)
     drawRoamBolusDecay(model.bolus, colors.bolus, toX, toY)
     drawBolusMarkers(model.bolus, colors.bolus, toX, toY, measurer, valueStyle)
-    drawBasalMarkers(model.basal, colors.basal, toX, toY, measurer, valueStyle)
+    drawBasalMarkers(model.basal, colors.basal, toX, toY, measurer, valueStyle, markerLevels.basal)
     drawGlucoseLine(model.line, colors.glucose, toX, toY)
     drawManualPoints(model.manual, colors.manual, measurer, valueStyle, toX, toY)
 
@@ -223,6 +226,7 @@ private fun DrawScope.drawRoam(
         toY,
         measurer,
         TextStyle(fontSize = 8.sp, color = colors.text),
+        markerLevels.meal,
     )
 
     crosshair?.let { p ->

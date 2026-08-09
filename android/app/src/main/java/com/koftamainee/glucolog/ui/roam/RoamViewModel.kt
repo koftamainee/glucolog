@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.koftamainee.glucolog.data.DayRepository
+import com.koftamainee.glucolog.data.MarkerLevelSettings
 import com.koftamainee.glucolog.data.MarkerLineSettings
 import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.data.TargetRangeSettings
@@ -42,6 +43,9 @@ class RoamViewModel(
 
     val markerLines: StateFlow<MarkerLineSettings> = settings.markerLines
         .stateIn(viewModelScope, SharingStarted.Eagerly, MarkerLineSettings())
+
+    val markerLevels: StateFlow<MarkerLevelSettings> = settings.markerLevels
+        .stateIn(viewModelScope, SharingStarted.Eagerly, MarkerLevelSettings())
 
     val targetRange: StateFlow<TargetRangeSettings> = settings.targetRange
         .stateIn(viewModelScope, SharingStarted.Eagerly, TargetRangeSettings())

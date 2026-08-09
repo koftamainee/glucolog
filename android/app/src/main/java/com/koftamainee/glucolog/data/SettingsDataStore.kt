@@ -37,6 +37,11 @@ data class TargetRangeSettings(
     val hi: Float = 8f,
 )
 
+data class MarkerLevelSettings(
+    val basal: Float = 14f,
+    val meal: Float = 14f,
+)
+
 class SettingsDataStore(private val context: Context) {
 
     private val themeKey = stringPreferencesKey("theme_mode")
@@ -49,6 +54,8 @@ class SettingsDataStore(private val context: Context) {
     private val targetLoKey = floatPreferencesKey("target_range_lo")
     private val targetHiKey = floatPreferencesKey("target_range_hi")
     private val targetGlucoseKey = floatPreferencesKey("target_glucose")
+    private val markerLevelBasalKey = floatPreferencesKey("marker_level_basal")
+    private val markerLevelMealKey = floatPreferencesKey("marker_level_meal")
 
     val markerLines: Flow<MarkerLineSettings> =
         context.dataStore.data.map { prefs ->
@@ -102,6 +109,22 @@ class SettingsDataStore(private val context: Context) {
 
     suspend fun setTargetGlucose(value: Float) {
         context.dataStore.edit { prefs -> prefs[targetGlucoseKey] = value }
+    }
+
+    val markerLevels: Flow<MarkerLevelSettings> =
+        context.dataStore.data.map { prefs ->
+            MarkerLevelSettings(
+                basal = prefs[markerLevelBasalKey] ?: 14f,
+                meal = prefs[markerLevelMealKey] ?: 14f,
+            )
+        }
+
+    suspend fun setMarkerLevelBasal(value: Float) {
+        context.dataStore.edit { prefs -> prefs[markerLevelBasalKey] = value }
+    }
+
+    suspend fun setMarkerLevelMeal(value: Float) {
+        context.dataStore.edit { prefs -> prefs[markerLevelMealKey] = value }
     }
 
     val themeMode: Flow<ThemeMode> =

@@ -18,6 +18,7 @@ fun DebouncedOutlinedTextField(
     value: String,
     onCommit: (String) -> Unit,
     modifier: Modifier = Modifier,
+    label: String = "",
     placeholder: String = "",
     minLines: Int = 1,
     singleLine: Boolean = false,
@@ -43,6 +44,7 @@ fun DebouncedOutlinedTextField(
             text = it
             dirty = true
         },
+        label = if (label.isEmpty()) null else { { Text(label) } },
         placeholder = { Text(placeholder) },
         minLines = minLines,
         singleLine = singleLine,

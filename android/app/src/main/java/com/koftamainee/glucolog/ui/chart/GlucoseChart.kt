@@ -28,6 +28,7 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.koftamainee.glucolog.data.MarkerLevelSettings
 import com.koftamainee.glucolog.data.MarkerLineSettings
 import com.koftamainee.glucolog.data.TargetRangeSettings
 import com.koftamainee.glucolog.domain.ChartModel
@@ -38,6 +39,7 @@ import com.koftamainee.glucolog.domain.floatToTime
 fun GlucoseChart(
     chart: ChartModel,
     markerLines: MarkerLineSettings,
+    markerLevels: MarkerLevelSettings,
     targetRange: TargetRangeSettings,
     modifier: Modifier = Modifier,
 ) {
@@ -73,7 +75,7 @@ fun GlucoseChart(
             },
     ) {
         Canvas(modifier = Modifier.fillMaxWidth().height(chartHeight)) {
-            drawChart(chart, colors, measurer, markerLines, targetRange, crosshair)
+            drawChart(chart, colors, measurer, markerLines, markerLevels, targetRange, crosshair)
         }
     }
 }
@@ -83,6 +85,7 @@ private fun DrawScope.drawChart(
     colors: ChartColors,
     measurer: TextMeasurer,
     markerLines: MarkerLineSettings,
+    markerLevels: MarkerLevelSettings,
     targetRange: TargetRangeSettings,
     crosshair: ChartPoint?,
 ) {
@@ -122,7 +125,7 @@ private fun DrawScope.drawChart(
 
     drawBolusDecay(chart.bolus, chart.prevBolus, colors.bolus, toX, toY)
     drawBolusMarkers(chart.bolus, colors.bolus, toX, toY, measurer, valueStyle)
-    drawBasalMarkers(chart.basal, colors.basal, toX, toY, measurer, valueStyle)
+    drawBasalMarkers(chart.basal, colors.basal, toX, toY, measurer, valueStyle, markerLevels.basal)
     drawGlucoseLine(chart.line, colors.glucose, toX, toY)
     drawManualPoints(chart.manual, colors.manual, measurer, valueStyle, toX, toY)
     drawMealMarkers(
@@ -132,6 +135,7 @@ private fun DrawScope.drawChart(
         toY,
         measurer,
         TextStyle(fontSize = 8.sp, color = colors.text),
+        markerLevels.meal,
     )
 
     crosshair?.let { p ->

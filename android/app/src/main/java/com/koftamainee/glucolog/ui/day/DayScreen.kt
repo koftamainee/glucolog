@@ -58,6 +58,7 @@ fun DayScreen(
     val date by viewModel.date.collectAsState()
     val data by viewModel.dayData.collectAsState()
     val markerLines by viewModel.markerLines.collectAsState()
+    val markerLevels by viewModel.markerLevels.collectAsState()
     val targetRange by viewModel.targetRange.collectAsState()
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -92,6 +93,7 @@ fun DayScreen(
                             data = day,
                             stats = statsOf(day.glucose.map { it.g }, prevAvg, targetRange.lo, targetRange.hi),
                             markerLines = markerLines,
+                            markerLevels = markerLevels,
                             targetRange = targetRange,
                             onAdd = { h, g -> viewModel.addGlucose(h, g, GlucoseSource.MANUAL) },
                             onOpenRoam = onOpenRoam,

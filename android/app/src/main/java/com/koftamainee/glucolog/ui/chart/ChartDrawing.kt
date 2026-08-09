@@ -43,7 +43,6 @@ internal const val MIN_G = 0f
 internal const val MAX_G = 17.5f
 internal const val RANGE_LO = 4f
 internal const val RANGE_HI = 8f
-internal const val MEAL_G = 14f
 
 internal const val DECAY_K = 0.4
 internal const val DECAY_STEP_H = 0.25f
@@ -296,9 +295,10 @@ internal fun DrawScope.drawBasalMarkers(
     toY: (Float) -> Float,
     measurer: TextMeasurer,
     valueStyle: TextStyle,
+    levelG: Float,
 ) {
     basal.forEach { p ->
-        val center = Offset(toX(p.h), toY(MEAL_G))
+        val center = Offset(toX(p.h), toY(levelG))
         drawCircle(color, 3.5.dp.toPx(), center)
         val text = measurer.measure(AnnotatedString(fmt(p.g)), valueStyle)
         drawText(
@@ -315,9 +315,10 @@ internal fun DrawScope.drawMealMarkers(
     toY: (Float) -> Float,
     measurer: TextMeasurer,
     carbsStyle: TextStyle,
+    levelG: Float,
 ) {
     meals.forEach { meal ->
-        val center = Offset(toX(meal.h), toY(MEAL_G))
+        val center = Offset(toX(meal.h), toY(levelG))
         drawCircle(color, 3.5.dp.toPx(), center)
         meal.carbs?.let { c ->
             val text = measurer.measure(AnnotatedString("$c г."), carbsStyle)
