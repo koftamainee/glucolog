@@ -189,6 +189,9 @@ class BolusViewModel(
                 note = product.note,
             ))
         }
+        viewModelScope.launch {
+            productRepo.markProductsUsed(listOf(product.id))
+        }
     }
 
     fun updateMass(index: Int, value: String) {

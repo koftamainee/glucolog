@@ -11,18 +11,20 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface FoodDao {
 
-    @Query("SELECT * FROM product WHERE source = :source AND hidden = 0 ORDER BY name")
+    @Query("SELECT * FROM product WHERE source = :source AND hidden = 0 " +
+        "ORDER BY (lastUsed IS NULL), lastUsed DESC, name")
     fun observeBySource(source: String): Flow<List<ProductEntity>>
 
     @Query(
         "SELECT * FROM product WHERE hidden = 0 AND nameLower LIKE '%' || :q || '%' " +
-            "ORDER BY name LIMIT :limit"
+            "ORDER BY (lastUsed IS NULL), lastUsed DESC, name LIMIT :limit"
     )
     suspend fun searchProducts(q: String, limit: Int): List<ProductEntity>
 
     @Query(
         "SELECT * FROM product WHERE source = :source AND hidden = 0 " +
-            "AND nameLower LIKE '%' || :q || '%' ORDER BY name LIMIT :limit"
+            "AND nameLower LIKE '%' || :q || '%' " +
+            "ORDER BY (lastUsed IS NULL), lastUsed DESC, name LIMIT :limit"
     )
     suspend fun searchProductsBySource(q: String, source: String, limit: Int): List<ProductEntity>
 
@@ -58,6 +60,9 @@ interface FoodDao {
 
     @Query("UPDATE product SET hidden = 0")
     suspend fun unhideAll()
+
+    @Query("UPDATE product SET lastUsed = :now WHERE id IN (:ids)")
+    suspend fun markProductsUsed(now: Long, ids: List<Long>)
 
     @Query("DELETE FROM product WHERE id = :id")
     suspend fun deleteProduct(id: Long)

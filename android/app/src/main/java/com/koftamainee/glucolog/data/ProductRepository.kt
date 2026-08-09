@@ -22,6 +22,11 @@ class ProductRepository(private val db: AppDatabase) {
 
     suspend fun getAllProducts(): List<ProductEntity> = foodDao.getAllProducts()
 
+    suspend fun markProductsUsed(ids: List<Long>) {
+        if (ids.isEmpty()) return
+        foodDao.markProductsUsed(System.currentTimeMillis(), ids)
+    }
+
     suspend fun addProduct(
         name: String,
         kcal: Float,
@@ -42,11 +47,15 @@ class ProductRepository(private val db: AppDatabase) {
             note = note,
             source = source,
             nameLower = normalizeName(name),
+            lastUsed = System.currentTimeMillis(),
         )
     )
 
     suspend fun updateProduct(product: ProductEntity) = foodDao.updateProduct(
-        product.copy(nameLower = normalizeName(product.name))
+        product.copy(
+            nameLower = normalizeName(product.name),
+            lastUsed = System.currentTimeMillis(),
+        )
     )
 
     suspend fun deleteProduct(id: Long) = foodDao.deleteProduct(id)

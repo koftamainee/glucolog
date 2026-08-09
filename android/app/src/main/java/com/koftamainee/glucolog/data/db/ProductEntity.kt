@@ -21,4 +21,5 @@ data class ProductEntity(
     val source: String,
     @ColumnInfo(defaultValue = "") val nameLower: String = "",
     @ColumnInfo(defaultValue = "0") val hidden: Boolean = false,
+    val lastUsed: Long? = null,
 )
