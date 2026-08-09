@@ -1,6 +1,5 @@
 package com.koftamainee.glucolog.data.importexport
 
-import com.koftamainee.glucolog.domain.Constants
 import com.koftamainee.glucolog.domain.MealField
 import com.koftamainee.glucolog.domain.PortableDay
 import com.koftamainee.glucolog.domain.floatToTime
@@ -36,12 +35,11 @@ object CsvCodec {
             }
             day.notes?.let { rows.add(listOf(day.date, "", "Заметки", it.replace("\n", " "), "")) }
             day.conclusions?.let { rows.add(listOf(day.date, "", "Выводы", it.replace("\n", " "), "")) }
-            Constants.MEALS.forEach { meal ->
-                val m = day.meals.firstOrNull { it.key == meal.key } ?: return@forEach
-                m.time?.let { rows.add(listOf(day.date, it, "${meal.key} время", "", "")) }
-                m.hunger?.takeIf { it > 0 }?.let { rows.add(listOf(day.date, "", "${meal.key} голод", "$it", "")) }
-                m.food?.let { rows.add(listOf(day.date, "", "${meal.key} еда", it.replace("\n", " "), "")) }
-                m.carbs?.let { rows.add(listOf(day.date, "", "${meal.key} углеводы", "$it", "г")) }
+            day.meals.forEach { m ->
+                m.time?.let { rows.add(listOf(day.date, it, "${m.key} время", "", "")) }
+                m.hunger?.takeIf { it > 0 }?.let { rows.add(listOf(day.date, "", "${m.key} голод", "$it", "")) }
+                m.food?.let { rows.add(listOf(day.date, "", "${m.key} еда", it.replace("\n", " "), "")) }
+                m.carbs?.let { rows.add(listOf(day.date, "", "${m.key} углеводы", "$it", "г")) }
             }
         }
         return rows.joinToString("\n") { row ->

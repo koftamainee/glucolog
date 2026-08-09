@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+    <queries>
+        <package android:name="com.mi.health" />
+        <package android:name="com.xiaomi.wearable" />
+    </queries>
 
     <application
         android:name=".GlucologApp"
@@ -43,8 +50,17 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".data.xdrip.BootRestartReceiver"
+            android:exported="false" />
+
         <service
             android:name=".data.xdrip.XdripMonitorService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <service
+            android:name=".data.xiaomi.XiaomiWatchService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
     </application>

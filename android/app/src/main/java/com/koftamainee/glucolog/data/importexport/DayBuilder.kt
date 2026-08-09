@@ -44,14 +44,12 @@ internal class DayBuilder {
     }
 
     fun putMeal(entry: MealEntry) {
-        if (entry.key !in MEAL_KEYS) return
         meals[entry.key] = entry.copy(
             food = Constants.blankToNull(entry.food),
         )
     }
 
     fun setMealField(key: String, field: MealField, value: String?) {
-        if (key !in MEAL_KEYS) return
         val current = meals[key] ?: MealEntry(key)
         meals[key] = when (field) {
             MealField.TIME -> current.copy(time = value)
@@ -66,12 +64,11 @@ internal class DayBuilder {
     }
 
     fun toPortable(date: String): PortableDay {
-        val orderedMeals = MEAL_KEYS.mapNotNull { meals[it] }
         return PortableDay(
             date = date,
             glucose = glucose.sortedBy { it.h },
             insulin = insulin.sortedBy { it.h },
-            meals = orderedMeals,
+            meals = meals.values.toList(),
             water = water,
             sport = sport,
             steps = steps,
@@ -82,9 +79,5 @@ internal class DayBuilder {
             notes = Constants.blankToNull(notes),
             conclusions = Constants.blankToNull(conclusions),
         )
-    }
-
-    companion object {
-        private val MEAL_KEYS = Constants.MEALS.map { it.key }
     }
 }

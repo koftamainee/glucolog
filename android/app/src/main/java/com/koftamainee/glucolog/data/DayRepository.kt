@@ -63,10 +63,13 @@ class DayRepository(private val db: AppDatabase) {
             glucose = glucoseDao.get(key),
             insulin = insulinDao.get(key),
             prevInsulin = insulinDao.get(DateKeys.key(date.minusDays(1))),
-            meals = MEAL_KEYS.mapNotNull { keyOf -> mealDao.get(key, keyOf) },
+            meals = mealDao.getForDate(key),
             stool = stoolDao.get(key),
         )
     }
+
+    suspend fun getGlucoseRange(from: LocalDate, to: LocalDate): List<GlucoseEntity> =
+        glucoseDao.getRange(DateKeys.key(from), DateKeys.key(to))
 
     suspend fun getDaysRange(from: LocalDate, to: LocalDate): List<PortableDay> {
         val fromKey = DateKeys.key(from)
@@ -88,11 +91,8 @@ class DayRepository(private val db: AppDatabase) {
                 insulin = allInsulin.filter { it.date == key }
                     .map { InsulinPoint(it.h, it.bolus, it.basal) }
                     .sortedBy { it.h },
-                meals = MEAL_KEYS.mapNotNull { mk ->
-                    allMeals.firstOrNull { it.date == key && it.key == mk }?.let {
-                        MealEntry(it.key, it.time, it.hunger, it.food, it.carbs)
-                    }
-                },
+                meals = allMeals.filter { it.date == key }
+                    .map { MealEntry(it.key, it.time, it.hunger, it.food, it.carbs) },
                 stool = allStool.filter { it.date == key }.map { it.option },
             )
         }
@@ -183,6 +183,18 @@ class DayRepository(private val db: AppDatabase) {
         mealDao.upsert(updated)
     }
 
+    suspend fun addMeal(date: LocalDate) {
+        val key = DateKeys.key(date)
+        mealDao.insert(
+            MealEntity(
+                date = key,
+                key = "custom_${System.nanoTime()}",
+            )
+        )
+    }
+
+    suspend fun deleteMeal(id: Long) = mealDao.deleteById(id)
+
     suspend fun toggleStool(date: LocalDate, option: String) {
         val key = DateKeys.key(date)
         val current = stoolDao.get(key)
@@ -211,11 +223,8 @@ class DayRepository(private val db: AppDatabase) {
                 insulin = allInsulin.filter { it.date == key }
                     .map { InsulinPoint(it.h, it.bolus, it.basal) }
                     .sortedBy { it.h },
-                meals = MEAL_KEYS.mapNotNull { mk ->
-                    allMeals.firstOrNull { it.date == key && it.key == mk }?.let {
-                        MealEntry(it.key, it.time, it.hunger, it.food, it.carbs)
-                    }
-                },
+                meals = allMeals.filter { it.date == key }
+                    .map { MealEntry(it.key, it.time, it.hunger, it.food, it.carbs) },
                 water = day?.water,
                 sport = day?.sport,
                 steps = day?.steps,
@@ -314,9 +323,5 @@ class DayRepository(private val db: AppDatabase) {
                 }
             }
         }
-    }
-
-    companion object {
-        private val MEAL_KEYS = Constants.MEALS.map { it.key }
     }
 }

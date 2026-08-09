@@ -1,5 +1,6 @@
 package com.koftamainee.glucolog.ui.xdrip
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -11,20 +12,27 @@ import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.data.xdrip.XdripStatus
 import com.koftamainee.glucolog.data.xdrip.XdripStatusProvider
 import com.koftamainee.glucolog.data.xdrip.XdripWebClient
+import com.koftamainee.glucolog.data.xdrip.XdripBroadcast
+import com.koftamainee.glucolog.data.xiaomi.XiaomiWatchService
 import com.koftamainee.glucolog.di.AppContainer
 import com.koftamainee.glucolog.domain.formatDateLabel
 import com.koftamainee.glucolog.domain.floatToTime
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+data class WatchStats(val lastSentMs: Long, val lastConfirmedMs: Long)
 
 class XdripSetupViewModel(
     private val statusProvider: XdripStatusProvider,
     private val client: XdripWebClient,
     private val settings: SettingsDataStore,
     private val repo: DayRepository,
+    private val appContext: Context,
 ) : ViewModel() {
 
     val status: StateFlow<XdripStatus> = statusProvider.status
@@ -35,6 +43,37 @@ class XdripSetupViewModel(
 
     private val _checkMessage = MutableStateFlow<String?>(null)
     val checkMessage: StateFlow<String?> = _checkMessage
+
+    val xiaomiEnabled: StateFlow<Boolean> = settings.xiaomiServiceEnabled
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val watchStats: StateFlow<WatchStats> = flow {
+        while (true) {
+            emit(WatchStats(XiaomiWatchService.lastSentMs, XiaomiWatchService.lastConfirmedMs))
+            delay(1000)
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, WatchStats(0, 0))
+
+    private val _forceMessage = MutableStateFlow<String?>(null)
+    val forceMessage: StateFlow<String?> = _forceMessage
+
+    fun setXiaomiEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settings.setXiaomiServiceEnabled(enabled)
+            if (enabled) {
+                XiaomiWatchService.start(appContext)
+            } else {
+                XiaomiWatchService.stop(appContext)
+            }
+        }
+    }
+
+    fun forceX() {
+        viewModelScope.launch {
+            XdripBroadcast.register(appContext)
+            _forceMessage.value = "Команда отправлена в xDrip"
+        }
+    }
 
     fun sync() {
         if (_checking.value) return
@@ -76,6 +115,7 @@ class XdripSetupViewModel(
                     client = container.xdripWebClient,
                     settings = container.settingsDataStore,
                     repo = container.dayRepository,
+                    appContext = container.appContext,
                 )
             }
         }

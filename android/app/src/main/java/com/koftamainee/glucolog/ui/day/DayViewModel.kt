@@ -84,6 +84,10 @@ class DayViewModel(
         repo.setMealField(_date.value, mealKey, field, value)
     }
 
+    fun addMeal() = launch { repo.addMeal(_date.value) }
+
+    fun deleteMeal(id: Long) = launch { repo.deleteMeal(id) }
+
 
     fun toggleStool(option: String) = launch { repo.toggleStool(_date.value, option) }
 

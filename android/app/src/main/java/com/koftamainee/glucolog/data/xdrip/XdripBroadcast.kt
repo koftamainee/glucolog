@@ -33,9 +33,9 @@ object XdripBroadcast {
     fun register(context: Context) {
         val settings = Settings().apply {
             apkName = context.getString(R.string.app_name)
-            graphStart = 0
-            graphEnd = 0
-            displayGraph = false
+            graphStart = GRAPH_START_MS
+            graphEnd = GRAPH_END_MS
+            displayGraph = true
         }
         val intent = Intent(ACTION_WATCH_COMMUNICATION_RECEIVER).apply {
             putExtra(INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE)
@@ -45,4 +45,7 @@ object XdripBroadcast {
         }
         context.sendBroadcast(intent)
     }
+
+    private const val GRAPH_START_MS = 4L * 60L * 60L * 1000L
+    private const val GRAPH_END_MS = 30L * 60L * 1000L
 }

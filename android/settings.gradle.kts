@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Glucolog"
 include(":app")
+include(":SDK")

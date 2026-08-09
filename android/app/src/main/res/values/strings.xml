@@ -4,4 +4,7 @@
     <string name="xdrip_service_channel_name">Мониторинг xDrip</string>
     <string name="xdrip_service_title">Glucolog</string>
     <string name="xdrip_service_text">Синхронизация с xDrip активна</string>
+    <string name="xiaomi_service_channel_name">Часы Xiaomi</string>
+    <string name="xiaomi_service_title">Glucolog</string>
+    <string name="xiaomi_service_text">Отправка показаний на часы активна</string>
 </resources>

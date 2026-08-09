@@ -3,14 +3,6 @@ package com.koftamainee.glucolog.domain
 import java.time.LocalDate
 
 object Constants {
-    val MEALS = listOf(
-        Meal("breakfast1", "Первый завтрак"),
-        Meal("breakfast2", "Второй завтрак"),
-        Meal("lunch", "Обед"),
-        Meal("snack", "Полдник"),
-        Meal("dinner", "Ужин"),
-    )
-
     val STOOL_OPTS = listOf(
         "Натощак",
         "Утром, после воды",
@@ -34,8 +26,6 @@ object Constants {
 
     fun blankToNull(value: String?): String? = value?.trim()?.takeIf { it.isNotEmpty() }
 }
-
-data class Meal(val key: String, val name: String)
 
 object DateKeys {
     fun key(date: LocalDate): String =

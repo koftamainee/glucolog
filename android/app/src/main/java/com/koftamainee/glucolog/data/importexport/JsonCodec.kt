@@ -1,6 +1,5 @@
 package com.koftamainee.glucolog.data.importexport
 
-import com.koftamainee.glucolog.domain.Constants
 import com.koftamainee.glucolog.domain.MealEntry
 import com.koftamainee.glucolog.domain.PortableDay
 import org.json.JSONArray
@@ -52,11 +51,15 @@ object JsonCodec {
                 }
             }
 
-            Constants.MEALS.forEach { meal ->
-                val m = dayObj.optJSONObject(meal.key) ?: return@forEach
+            dayObj.keys().forEach { key ->
+                if (key in NON_MEAL_KEYS) return@forEach
+                val m = dayObj.optJSONObject(key) ?: return@forEach
+                if (!m.has("time") && !m.has("hunger") && !m.has("food") && !m.has("carbs")) {
+                    return@forEach
+                }
                 builder.putMeal(
                     MealEntry(
-                        key = meal.key,
+                        key = key,
                         time = m.optString("time").takeIf { it.isNotEmpty() },
                         hunger = m.optInt("hunger", -1).takeIf { it in 1..5 },
                         food = m.optString("food").takeIf { it.isNotEmpty() },
@@ -126,14 +129,13 @@ object JsonCodec {
                 }
             })
         }
-        Constants.MEALS.forEach { meal ->
-            val m = day.meals.firstOrNull { it.key == meal.key } ?: return@forEach
+        day.meals.forEach { m ->
             val mo = JSONObject()
             m.time?.let { mo.put("time", it) }
             m.hunger?.let { mo.put("hunger", it) }
             m.food?.let { mo.put("food", it) }
             m.carbs?.let { mo.put("carbs", it) }
-            o.put(meal.key, mo)
+            o.put(m.key, mo)
         }
         day.water?.let { o.put("water", it) }
         day.sport?.let { o.put("sport", it) }
@@ -150,4 +152,9 @@ object JsonCodec {
     }
 
     private val DATE_REGEX = Regex("\\d{4}-\\d{2}-\\d{2}")
+
+    private val NON_MEAL_KEYS = setOf(
+        "glucose", "insulin", "water", "sport", "steps",
+        "sleepStart", "sleepEnd", "stress", "stool", "notes", "conclusions",
+    )
 }

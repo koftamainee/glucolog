@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.koftamainee.glucolog.domain.Constants
 import com.koftamainee.glucolog.domain.DayTextField
 import com.koftamainee.glucolog.domain.GlucoseSource
 import com.koftamainee.glucolog.domain.formatDateLabel
@@ -40,7 +38,7 @@ import com.koftamainee.glucolog.ui.day.sections.BolusCard
 import com.koftamainee.glucolog.ui.day.sections.ConclusionsCard
 import com.koftamainee.glucolog.ui.day.sections.GlucoseSection
 import com.koftamainee.glucolog.ui.day.sections.JournalSection
-import com.koftamainee.glucolog.ui.day.sections.MealCard
+import com.koftamainee.glucolog.ui.day.sections.MealsSection
 import com.koftamainee.glucolog.ui.day.sections.NotesCard
 import com.koftamainee.glucolog.ui.day.sections.SleepSection
 import com.koftamainee.glucolog.ui.day.sections.SportSection
@@ -97,13 +95,14 @@ fun DayScreen(
                     }
                     item(key = "bolus") { BolusCard(onAdd = viewModel::setBolus) }
                     item(key = "basal") { BasalCard(onAdd = viewModel::setBasal) }
-                    items(Constants.MEALS, key = { it.key }) { meal ->
-                        MealCard(
-                            title = meal.name,
-                            meal = day.meals.firstOrNull { it.key == meal.key },
-                            onSetField = { field, value ->
-                                viewModel.setMealField(meal.key, field, value)
+                    item(key = "meals") {
+                        MealsSection(
+                            meals = day.meals,
+                            onSetField = { key, field, value ->
+                                viewModel.setMealField(key, field, value)
                             },
+                            onAdd = viewModel::addMeal,
+                            onDelete = viewModel::deleteMeal,
                         )
                     }
                     item(key = "water") {
