@@ -9,11 +9,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
-    <queries>
-        <package android:name="com.mi.health" />
-        <package android:name="com.xiaomi.wearable" />
-    </queries>
-
     <application
         android:name=".GlucologApp"
         android:allowBackup="true"
@@ -56,11 +51,6 @@
 
         <service
             android:name=".data.xdrip.XdripMonitorService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
-        <service
-            android:name=".data.xiaomi.XiaomiWatchService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
     </application>

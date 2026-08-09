@@ -1,10 +1,5 @@
 package com.koftamainee.glucolog.ui.xdrip
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,35 +17,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.koftamainee.glucolog.domain.formatDateLabel
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun XdripSetupScreen(viewModel: XdripSetupViewModel, onBack: () -> Unit) {
     val status by viewModel.status.collectAsState()
     val checking by viewModel.checking.collectAsState()
     val message by viewModel.checkMessage.collectAsState()
-    val xiaomiEnabled by viewModel.xiaomiEnabled.collectAsState()
-    val watchStats by viewModel.watchStats.collectAsState()
     val forceMessage by viewModel.forceMessage.collectAsState()
-
-    val context = LocalContext.current
-    val notificationLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { }
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
         Column(
@@ -102,57 +84,6 @@ fun XdripSetupScreen(viewModel: XdripSetupViewModel, onBack: () -> Unit) {
                 Text(text = it, style = MaterialTheme.typography.bodyMedium)
             }
 
-            Text("Часы Xiaomi (WatchDrip)", style = MaterialTheme.typography.titleMedium)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Отправлять показания на часы",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Text(
-                        text = if (xiaomiEnabled) "Сервис запущен" else "Выключено",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Switch(
-                    checked = xiaomiEnabled,
-                    onCheckedChange = { enabled ->
-                        if (enabled &&
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                            ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.POST_NOTIFICATIONS,
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                        viewModel.setXiaomiEnabled(enabled)
-                    },
-                )
-            }
-            Text(
-                text = "1. Спарите часы с Mi Fitness.\n" +
-                    "2. Установите на часы приложение WatchDrip из магазина часов.\n" +
-                    "3. Включите тумблер.\n" +
-                    "4. Разрешите уведомления и доступ к Mi Fitness.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "Отправлено: ${watchTime(watchStats.lastSentMs)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "Подтверждено с часов: ${watchTime(watchStats.lastConfirmedMs)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
             Button(
                 onClick = viewModel::forceX,
                 modifier = Modifier.fillMaxWidth(),
@@ -177,10 +108,4 @@ fun XdripSetupScreen(viewModel: XdripSetupViewModel, onBack: () -> Unit) {
             )
         }
     }
-}
-
-private fun watchTime(ms: Long): String {
-    if (ms <= 0L) return "—"
-    return Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault())
-        .format(DateTimeFormatter.ofPattern("HH:mm dd.MM"))
 }

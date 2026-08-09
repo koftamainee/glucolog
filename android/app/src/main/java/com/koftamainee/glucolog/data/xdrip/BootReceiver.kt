@@ -7,8 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import com.koftamainee.glucolog.GlucologApp
-import com.koftamainee.glucolog.data.xiaomi.XiaomiWatchService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,23 +16,13 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
         Log.d(TAG, "boot completed, restarting services")
-        val app = context.applicationContext as GlucologApp
         CoroutineScope(Dispatchers.IO).launch {
-            val xiaomiEnabled = app.container.settingsDataStore.isXiaomiServiceEnabled()
             var blocked = false
             try {
                 XdripMonitorService.start(context)
             } catch (e: Exception) {
                 Log.w(TAG, "monitor start blocked", e)
                 blocked = true
-            }
-            if (xiaomiEnabled) {
-                try {
-                    XiaomiWatchService.start(context)
-                } catch (e: Exception) {
-                    Log.w(TAG, "xiaomi start blocked", e)
-                    blocked = true
-                }
             }
             if (blocked) scheduleRestart(context)
         }
