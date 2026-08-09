@@ -63,7 +63,7 @@ object BolusCalculator {
             insulinOnBje = insulinBje,
             correction = correction,
             activeInsulin = activeInsulin,
-            total = round2(insulinBu + insulinBje + correction - activeInsulin),
+            total = round2(insulinBu + correction - activeInsulin),
         )
     }
 

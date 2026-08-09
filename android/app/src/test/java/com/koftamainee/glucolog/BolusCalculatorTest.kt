@@ -57,7 +57,24 @@ class BolusCalculatorTest {
         assertEquals(131.56f, result.totalCarbs, 0.01f)
         assertEquals(1.05f, result.insulinOnBreadUnits, 0.001f)
         assertEquals(0.1f, result.insulinOnBje, 0.001f)
-        assertEquals(1.15f, result.total, 0.001f)
+        assertEquals(1.05f, result.total, 0.001f)
+    }
+
+    @Test
+    fun totalUsesOnlyInsulinOnBreadUnits() {
+        val items = listOf(
+            FoodPortion(kovrizhka, 142f),
+            FoodPortion(pastila, 32f),
+        )
+        val result = BolusCalculator.calculate(
+            items = items,
+            ug = 0.48f,
+            fchi = 5f,
+            targetGlucose = 5f,
+            actualGlucose = 5f,
+            activeInsulin = 0f,
+        )
+        assertEquals(result.insulinOnBreadUnits, result.total, 0.001f)
     }
 
     @Test
@@ -97,7 +114,7 @@ class BolusCalculatorTest {
             actualGlucose = 5f,
             activeInsulin = 0.4f,
         )
-        assertEquals(0.53f, result.total, 0.001f)
+        assertEquals(0.43f, result.total, 0.001f)
     }
 
     @Test

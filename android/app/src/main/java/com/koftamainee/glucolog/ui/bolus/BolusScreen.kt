@@ -371,7 +371,7 @@ private fun CalculationTab(
                 ResultRow("Инсулин на ХЕ", fmt(result.insulinOnBreadUnits))
                 HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Text("Итоговый болюс", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text("Итоговый болюс (ХЕ)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     Text(
                         text = fmt(result.total) + " ЕД",
                         style = MaterialTheme.typography.titleMedium,

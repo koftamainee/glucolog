@@ -83,7 +83,7 @@ fun GlucoseSection(
             OutlinedTextField(
                 value = value,
                 onValueChange = { value = it },
-                label = { Text("ед.") },
+                label = { Text("ммоль/л") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
