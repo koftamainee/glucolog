@@ -35,6 +35,8 @@ import com.koftamainee.glucolog.ui.importexport.ImportExportScreen
 import com.koftamainee.glucolog.ui.importexport.ImportExportViewModel
 import com.koftamainee.glucolog.ui.roam.RoamScreen
 import com.koftamainee.glucolog.ui.roam.RoamViewModel
+import com.koftamainee.glucolog.ui.settings.ChartSettingsScreen
+import com.koftamainee.glucolog.ui.settings.ChartSettingsViewModel
 import com.koftamainee.glucolog.ui.xdrip.XdripSetupScreen
 import com.koftamainee.glucolog.ui.xdrip.XdripSetupViewModel
 
@@ -77,6 +79,14 @@ fun AppNavHost(container: AppContainer) {
                     ImportExportScreen(
                         viewModel = vm,
                         onOpenXdrip = { navController.navigate("xdrip") },
+                        onOpenChartSettings = { navController.navigate("chart-settings") },
+                    )
+                }
+                composable("chart-settings") {
+                    val vm: ChartSettingsViewModel = viewModel(factory = ChartSettingsViewModel.factory(container))
+                    ChartSettingsScreen(
+                        viewModel = vm,
+                        onBack = { navController.popBackStack() },
                     )
                 }
                 composable("xdrip") {
@@ -102,7 +112,7 @@ private fun BottomNav(navController: NavHostController) {
 
     val tabs = listOf(
         BottomTab("day", "День", Icons.Filled.DateRange),
-        BottomTab("io", "Данные", Icons.AutoMirrored.Filled.List),
+        BottomTab("io", "Настройки", Icons.AutoMirrored.Filled.List),
     )
 
     NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {

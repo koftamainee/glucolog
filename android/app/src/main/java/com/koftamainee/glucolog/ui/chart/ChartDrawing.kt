@@ -3,9 +3,11 @@ package com.koftamainee.glucolog.ui.chart
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.AnnotatedString
@@ -17,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.koftamainee.glucolog.domain.ChartMeal
 import com.koftamainee.glucolog.domain.ChartPoint
+import com.koftamainee.glucolog.domain.floatToTime
 import com.koftamainee.glucolog.ui.theme.ChartBasal
 import com.koftamainee.glucolog.ui.theme.ChartBasalDark
 import com.koftamainee.glucolog.ui.theme.ChartBolus
@@ -40,7 +43,7 @@ internal const val MIN_G = 0f
 internal const val MAX_G = 17.5f
 internal const val RANGE_LO = 4f
 internal const val RANGE_HI = 8f
-internal const val MEAL_G = 16f
+internal const val MEAL_G = 14f
 
 internal const val DECAY_K = 0.4
 internal const val DECAY_STEP_H = 0.25f
@@ -120,6 +123,48 @@ internal fun DrawScope.drawRangeBand(
         topLeft = Offset(0f, toY(RANGE_HI)),
         size = Size(w, toY(RANGE_LO) - toY(RANGE_HI)),
     )
+}
+
+internal fun DrawScope.drawMarkerLines(
+    hours: List<Float>,
+    color: Color,
+    toX: (Float) -> Float,
+    measurer: TextMeasurer,
+    usedLabels: MutableList<Rect> = mutableListOf(),
+) {
+    if (hours.isEmpty()) return
+    val labelStyle = TextStyle(
+        fontSize = 8.sp,
+        fontWeight = FontWeight.Medium,
+        color = color,
+    )
+    val padY = 2.dp.toPx()
+    val rowGap = 1.dp.toPx()
+    hours.sorted().forEach { hour ->
+        val x = toX(hour)
+        if (x < 0f || x > size.width) return@forEach
+        drawLine(
+            color = color.copy(alpha = 0.7f),
+            start = Offset(x, 0f),
+            end = Offset(x, size.height),
+            strokeWidth = 1.dp.toPx(),
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f)),
+        )
+        val text = measurer.measure(AnnotatedString(floatToTime(hour % 24f)), labelStyle)
+        val left = (x - text.size.width / 2f).coerceIn(0f, size.width - text.size.width)
+        var top = padY
+        while (usedLabels.any {
+                it.overlaps(Rect(left, top, left + text.size.width, top + text.size.height))
+            }
+        ) {
+            top += text.size.height + rowGap
+        }
+        drawText(
+            textLayoutResult = text,
+            topLeft = Offset(left, top),
+        )
+        usedLabels += Rect(left, top, left + text.size.width, top + text.size.height)
+    }
 }
 
 internal fun DrawScope.drawGlucoseLine(

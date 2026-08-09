@@ -7,6 +7,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.koftamainee.glucolog.di.AppContainer
 import com.koftamainee.glucolog.data.DayRepository
+import com.koftamainee.glucolog.data.MarkerLineSettings
+import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.data.db.GlucoseEntity
 import com.koftamainee.glucolog.domain.DayData
 import com.koftamainee.glucolog.domain.DayTextField
@@ -25,6 +27,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 class DayViewModel(
     private val repo: DayRepository,
+    private val settings: SettingsDataStore,
 ) : ViewModel() {
 
     private val _date = MutableStateFlow(LocalDate.now())
@@ -37,6 +40,9 @@ class DayViewModel(
     val prevAvg: StateFlow<Float?> = _date
         .flatMapLatest { repo.observePrevAvg(it) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val markerLines: StateFlow<MarkerLineSettings> = settings.markerLines
+        .stateIn(viewModelScope, SharingStarted.Eagerly, MarkerLineSettings())
 
     fun setDate(date: LocalDate) {
         _date.value = date
@@ -98,7 +104,7 @@ class DayViewModel(
     companion object {
         fun factory(container: AppContainer) = viewModelFactory {
             initializer {
-                DayViewModel(container.dayRepository)
+                DayViewModel(container.dayRepository, container.settingsDataStore)
             }
         }
     }

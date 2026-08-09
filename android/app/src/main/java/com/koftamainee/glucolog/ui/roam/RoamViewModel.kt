@@ -8,11 +8,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.koftamainee.glucolog.data.DayRepository
+import com.koftamainee.glucolog.data.MarkerLineSettings
+import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.di.AppContainer
 import com.koftamainee.glucolog.domain.RoamModel
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 private const val CONTEXT_DAYS = 1L
@@ -23,6 +27,7 @@ private const val EDGE_DAYS = 2L
 class RoamViewModel(
     savedStateHandle: SavedStateHandle,
     private val repo: DayRepository,
+    private val settings: SettingsDataStore,
 ) : ViewModel() {
 
     private val openedDate: LocalDate =
@@ -33,6 +38,9 @@ class RoamViewModel(
 
     private val _model = MutableStateFlow<RoamModel>(RoamModel.EMPTY)
     val model: StateFlow<RoamModel> = _model
+
+    val markerLines: StateFlow<MarkerLineSettings> = settings.markerLines
+        .stateIn(viewModelScope, SharingStarted.Eagerly, MarkerLineSettings())
 
     private var windowStart: LocalDate = openedDate.minusDays(INITIAL_RANGE_DAYS)
     private var windowEnd: LocalDate = openedDate.plusDays(INITIAL_RANGE_DAYS)
@@ -70,7 +78,11 @@ class RoamViewModel(
     companion object {
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                RoamViewModel(createSavedStateHandle(), container.dayRepository)
+                RoamViewModel(
+                    createSavedStateHandle(),
+                    container.dayRepository,
+                    container.settingsDataStore,
+                )
             }
         }
     }

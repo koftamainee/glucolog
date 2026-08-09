@@ -39,6 +39,7 @@ fun RoamScreen(
     onBack: () -> Unit,
 ) {
     val model by viewModel.model.collectAsState()
+    val markerLines by viewModel.markerLines.collectAsState()
     var pxPerHour by remember { mutableStateOf(INITIAL_PX_PER_HOUR) }
     var centerHour by remember { mutableStateOf(viewModel.openedCenterHour) }
 
@@ -106,6 +107,7 @@ fun RoamScreen(
                 model = model,
                 centerHour = centerHour,
                 pxPerHour = pxPerHour,
+                markerLines = markerLines,
                 onCenterHour = { centerHour = it },
                 onPxPerHour = { pxPerHour = it },
                 modifier = Modifier.fillMaxSize(),

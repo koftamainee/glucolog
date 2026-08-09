@@ -29,7 +29,11 @@ import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 
 @Composable
-fun ImportExportScreen(viewModel: ImportExportViewModel, onOpenXdrip: () -> Unit = {}) {
+fun ImportExportScreen(
+    viewModel: ImportExportViewModel,
+    onOpenXdrip: () -> Unit = {},
+    onOpenChartSettings: () -> Unit = {},
+) {
     val busy by viewModel.busy.collectAsState()
     val message by viewModel.message.collectAsState()
     val pending by viewModel.pending.collectAsState()
@@ -61,7 +65,15 @@ fun ImportExportScreen(viewModel: ImportExportViewModel, onOpenXdrip: () -> Unit
                 .padding(horizontal = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("Данные", style = MaterialTheme.typography.titleLarge)
+            Text("Настройки", style = MaterialTheme.typography.titleLarge)
+
+            Text("График", style = MaterialTheme.typography.titleMedium)
+            Button(
+                onClick = onOpenChartSettings,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Настройки графика") }
+
+            Spacer(Modifier.height(4.dp))
 
             Text("Экспорт", style = MaterialTheme.typography.titleMedium)
             Button(

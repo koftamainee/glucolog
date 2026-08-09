@@ -57,6 +57,7 @@ fun DayScreen(
 ) {
     val date by viewModel.date.collectAsState()
     val data by viewModel.dayData.collectAsState()
+    val markerLines by viewModel.markerLines.collectAsState()
     var showDatePicker by remember { mutableStateOf(false) }
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
@@ -89,6 +90,7 @@ fun DayScreen(
                         GlucoseSection(
                             data = day,
                             stats = statsOf(day.glucose.map { it.g }, prevAvg),
+                            markerLines = markerLines,
                             onAdd = { h, g -> viewModel.addGlucose(h, g, GlucoseSource.MANUAL) },
                             onOpenRoam = onOpenRoam,
                         )

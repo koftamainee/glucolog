@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.koftamainee.glucolog.data.MarkerLineSettings
 import com.koftamainee.glucolog.domain.ChartPoint
 import com.koftamainee.glucolog.domain.RoamModel
 import com.koftamainee.glucolog.domain.floatToTime
@@ -40,12 +42,14 @@ import com.koftamainee.glucolog.ui.chart.drawBasalMarkers
 import com.koftamainee.glucolog.ui.chart.drawBolusMarkers
 import com.koftamainee.glucolog.ui.chart.drawGlucoseLine
 import com.koftamainee.glucolog.ui.chart.drawManualPoints
+import com.koftamainee.glucolog.ui.chart.drawMarkerLines
 import com.koftamainee.glucolog.ui.chart.drawMealMarkers
 import com.koftamainee.glucolog.ui.chart.drawRangeBand
 import com.koftamainee.glucolog.ui.chart.drawRoamBolusDecay
 import com.koftamainee.glucolog.ui.chart.drawXGrid
 import com.koftamainee.glucolog.ui.chart.drawYGrid
 import com.koftamainee.glucolog.ui.chart.fmt
+import com.koftamainee.glucolog.ui.chart.MAX_DECAY_H
 import java.time.LocalDate
 import kotlin.math.floor
 
@@ -59,6 +63,7 @@ fun RoamChart(
     model: RoamModel,
     centerHour: Float,
     pxPerHour: Float,
+    markerLines: MarkerLineSettings,
     onCenterHour: (Float) -> Unit,
     onPxPerHour: (Float) -> Unit,
     modifier: Modifier = Modifier,
@@ -135,7 +140,7 @@ fun RoamChart(
                     }
                 },
         ) {
-            drawRoam(latestModel, colors, measurer, latestPxPerHour, latestCenterHour, crosshair)
+            drawRoam(latestModel, colors, measurer, latestPxPerHour, latestCenterHour, markerLines, crosshair)
         }
     }
 }
@@ -146,6 +151,7 @@ private fun DrawScope.drawRoam(
     measurer: TextMeasurer,
     pxPerHour: Float,
     centerHour: Float,
+    markerLines: MarkerLineSettings,
     crosshair: ChartPoint?,
 ) {
     val w = size.width
@@ -176,6 +182,29 @@ private fun DrawScope.drawRoam(
     }
 
     drawRangeBand(colors, toY, w)
+
+    val usedLabels = mutableListOf<Rect>()
+    if (markerLines.manual) {
+        drawMarkerLines(model.manual.map { it.h }, colors.manual, toX, measurer, usedLabels)
+    }
+    if (markerLines.meal) {
+        drawMarkerLines(model.meals.map { it.h }, colors.meal, toX, measurer, usedLabels)
+    }
+    if (markerLines.basal) {
+        drawMarkerLines(model.basal.map { it.h }, colors.basal, toX, measurer, usedLabels)
+    }
+    if (markerLines.bolusStart) {
+        drawMarkerLines(model.bolus.map { it.h }, colors.bolus, toX, measurer, usedLabels)
+    }
+    if (markerLines.bolusEnd) {
+        drawMarkerLines(
+            model.bolus.map { it.h + MAX_DECAY_H },
+            colors.bolus,
+            toX,
+            measurer,
+            usedLabels,
+        )
+    }
 
     val valueStyle = TextStyle(fontSize = 9.sp, color = colors.text)
     drawRoamBolusDecay(model.bolus, colors.bolus, toX, toY)

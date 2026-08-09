@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.koftamainee.glucolog.data.MarkerLineSettings
 import com.koftamainee.glucolog.domain.ChartModel
 import com.koftamainee.glucolog.domain.DayData
 import com.koftamainee.glucolog.domain.DayStats
@@ -52,6 +53,7 @@ import java.time.LocalDate
 fun GlucoseSection(
     data: DayData,
     stats: DayStats?,
+    markerLines: MarkerLineSettings,
     onAdd: (h: Float, g: Float) -> Unit,
     onOpenRoam: (LocalDate) -> Unit,
 ) {
@@ -62,7 +64,7 @@ fun GlucoseSection(
             Icon(Icons.Filled.Fullscreen, contentDescription = "Развернуть график")
         }
     }) {
-        GlucoseChart(chart = chart)
+        GlucoseChart(chart = chart, markerLines = markerLines)
         ChartXLabels()
         ChartLegend()
         StatsRow(stats = stats)

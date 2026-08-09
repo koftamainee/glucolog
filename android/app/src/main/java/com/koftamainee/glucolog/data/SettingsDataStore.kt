@@ -23,10 +23,54 @@ enum class ThemeMode(val storageValue: String) {
     }
 }
 
+data class MarkerLineSettings(
+    val manual: Boolean = true,
+    val meal: Boolean = true,
+    val bolusStart: Boolean = true,
+    val bolusEnd: Boolean = true,
+    val basal: Boolean = true,
+)
+
 class SettingsDataStore(private val context: Context) {
 
     private val themeKey = stringPreferencesKey("theme_mode")
     private val xdripConnectedKey = booleanPreferencesKey("xdrip_connected")
+    private val markerManualKey = booleanPreferencesKey("marker_line_manual")
+    private val markerMealKey = booleanPreferencesKey("marker_line_meal")
+    private val markerBolusStartKey = booleanPreferencesKey("marker_line_bolus_start")
+    private val markerBolusEndKey = booleanPreferencesKey("marker_line_bolus_end")
+    private val markerBasalKey = booleanPreferencesKey("marker_line_basal")
+
+    val markerLines: Flow<MarkerLineSettings> =
+        context.dataStore.data.map { prefs ->
+            MarkerLineSettings(
+                manual = prefs[markerManualKey] ?: true,
+                meal = prefs[markerMealKey] ?: true,
+                bolusStart = prefs[markerBolusStartKey] ?: true,
+                bolusEnd = prefs[markerBolusEndKey] ?: true,
+                basal = prefs[markerBasalKey] ?: true,
+            )
+        }
+
+    suspend fun setMarkerLineManual(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[markerManualKey] = value }
+    }
+
+    suspend fun setMarkerLineMeal(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[markerMealKey] = value }
+    }
+
+    suspend fun setMarkerLineBolusStart(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[markerBolusStartKey] = value }
+    }
+
+    suspend fun setMarkerLineBolusEnd(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[markerBolusEndKey] = value }
+    }
+
+    suspend fun setMarkerLineBasal(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[markerBasalKey] = value }
+    }
 
     val themeMode: Flow<ThemeMode> =
         context.dataStore.data.map { prefs ->
