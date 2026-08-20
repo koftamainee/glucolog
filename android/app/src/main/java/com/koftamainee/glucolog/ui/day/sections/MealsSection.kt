@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.koftamainee.glucolog.data.db.MealEntity
@@ -84,13 +86,21 @@ fun MealsSection(
                         onReorder(reordered.map { it.id })
                     },
                     modifier = Modifier.fillMaxWidth(),
-                ) { index, meal, _ ->
-                    ReorderableItem(modifier = Modifier.fillMaxWidth()) {
+                ) { index, meal, isDragging ->
+                    ReorderableItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer {
+                                scaleX = if (isDragging) 1.02f else 1f
+                                scaleY = if (isDragging) 1.02f else 1f
+                            },
+                    ) {
                         MealCard(
                             title = "Приём пищи ${index + 1}",
                             meal = meal,
                             onSetField = { field, value -> onSetField(meal.key, field, value) },
                             onDelete = { onDelete(meal.id) },
+                            isDragging = isDragging,
                             dragHandleModifier = Modifier.longPressDraggableHandle(),
                         )
                     }
@@ -111,6 +121,7 @@ private fun MealCard(
     meal: MealEntity?,
     onSetField: (MealField, String?) -> Unit,
     onDelete: () -> Unit,
+    isDragging: Boolean = false,
     dragHandleModifier: Modifier = Modifier,
 ) {
     Surface(
@@ -119,7 +130,12 @@ private fun MealCard(
             .padding(bottom = 10.dp),
         shape = RoundedCornerShape(10.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(
+            1.dp,
+            if (isDragging) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.outlineVariant,
+        ),
+        shadowElevation = if (isDragging) 6.dp else 0.dp,
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
@@ -128,6 +144,17 @@ private fun MealCard(
                     .then(dragHandleModifier),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                Icon(
+                    imageVector = Icons.Default.DragHandle,
+                    contentDescription = "Перетащить",
+                    tint = if (isDragging)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(end = 4.dp),
+                )
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
