@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MealDao {
-    @Query("SELECT * FROM meal WHERE date = :date ORDER BY id")
+    @Query("SELECT * FROM meal WHERE date = :date ORDER BY sortOrder, id")
     fun observe(date: String): Flow<List<MealEntity>>
 
-    @Query("SELECT * FROM meal WHERE date = :date ORDER BY id")
+    @Query("SELECT * FROM meal WHERE date = :date ORDER BY sortOrder, id")
     suspend fun getForDate(date: String): List<MealEntity>
 
     @Query("SELECT * FROM meal WHERE date = :date AND key = :key")
@@ -39,6 +39,9 @@ interface MealDao {
 
     @Query("DELETE FROM meal WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("UPDATE meal SET sortOrder = :sortOrder WHERE id = :id")
+    suspend fun setSortOrder(id: Long, sortOrder: Int)
 
     @Query("DELETE FROM meal")
     suspend fun deleteAll()

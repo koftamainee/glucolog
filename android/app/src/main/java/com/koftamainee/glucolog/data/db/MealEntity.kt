@@ -1,5 +1,6 @@
 package com.koftamainee.glucolog.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -16,4 +17,5 @@ data class MealEntity(
     val hunger: Int? = null,
     val food: String? = null,
     val carbs: Int? = null,
+    @ColumnInfo(defaultValue = "0") val sortOrder: Int = 0,
 )

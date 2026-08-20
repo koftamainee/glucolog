@@ -185,15 +185,29 @@ class DayRepository(private val db: AppDatabase) {
 
     suspend fun addMeal(date: LocalDate) {
         val key = DateKeys.key(date)
+        val maxSortOrder = mealDao.getForDate(key).maxOfOrNull { it.sortOrder } ?: 0
         mealDao.insert(
             MealEntity(
                 date = key,
                 key = "custom_${System.nanoTime()}",
+                sortOrder = maxSortOrder + 1,
             )
         )
     }
 
     suspend fun deleteMeal(id: Long) = mealDao.deleteById(id)
+
+    suspend fun reorderMeals(orderedIds: List<Long>) {
+        orderedIds.forEachIndexed { index, id ->
+            mealDao.setSortOrder(id, index)
+        }
+    }
+
+    suspend fun setMealSortOrder(date: LocalDate, mealKey: String, sortOrder: Int) {
+        val key = DateKeys.key(date)
+        val meal = mealDao.get(key, mealKey) ?: return
+        mealDao.setSortOrder(meal.id, sortOrder)
+    }
 
     suspend fun toggleStool(date: LocalDate, option: String) {
         val key = DateKeys.key(date)

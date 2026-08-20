@@ -109,6 +109,7 @@ fun DayScreen(
                             },
                             onAdd = viewModel::addMeal,
                             onDelete = viewModel::deleteMeal,
+                            onReorder = viewModel::reorderMeals,
                         )
                     }
                     item(key = "water") {

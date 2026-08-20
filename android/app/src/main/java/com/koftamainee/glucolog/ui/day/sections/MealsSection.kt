@@ -31,8 +31,10 @@ import com.koftamainee.glucolog.domain.Constants
 import com.koftamainee.glucolog.domain.MealField
 import com.koftamainee.glucolog.ui.components.DebouncedOutlinedTextField
 import com.koftamainee.glucolog.ui.components.PrimaryAddButton
-import com.koftamainee.glucolog.ui.components.SectionCard
 import com.koftamainee.glucolog.ui.components.TimeField
+import sh.calvin.reorderable.ReorderableColumn
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.longPressDraggableHandle
 
 @Composable
 fun MealsSection(
@@ -40,29 +42,66 @@ fun MealsSection(
     onSetField: (String, MealField, String?) -> Unit,
     onAdd: () -> Unit,
     onDelete: (Long) -> Unit,
+    onReorder: (List<Long>) -> Unit,
 ) {
-    SectionCard(title = "Приёмы пищи") {
-        if (meals.isEmpty()) {
-            Text(
-                text = "Пока нет приёмов пищи",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 10.dp),
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Приёмы пищи",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (meals.isEmpty()) {
+                Text(
+                    text = "Пока нет приёмов пищи",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 10.dp),
+                )
+            }
+            if (meals.isNotEmpty()) {
+                val mutableMeals = meals.toMutableList()
+                ReorderableColumn(
+                    list = mutableMeals,
+                    onSettle = { fromIndex, toIndex ->
+                        val reordered = mutableMeals.toMutableList().apply {
+                            add(toIndex, removeAt(fromIndex))
+                        }
+                        mutableMeals.clear()
+                        mutableMeals.addAll(reordered)
+                        onReorder(reordered.map { it.id })
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { index, meal, _ ->
+                    ReorderableItem(modifier = Modifier.fillMaxWidth()) {
+                        MealCard(
+                            title = "Приём пищи ${index + 1}",
+                            meal = meal,
+                            onSetField = { field, value -> onSetField(meal.key, field, value) },
+                            onDelete = { onDelete(meal.id) },
+                        )
+                    }
+                }
+            }
+            PrimaryAddButton(
+                text = "Добавить",
+                onClick = onAdd,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
-        meals.forEachIndexed { index, meal ->
-            MealCard(
-                title = "Приём пищи ${index + 1}",
-                meal = meal,
-                onSetField = { field, value -> onSetField(meal.key, field, value) },
-                onDelete = { onDelete(meal.id) },
-            )
-        }
-        PrimaryAddButton(
-            text = "Добавить",
-            onClick = onAdd,
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 
@@ -83,7 +122,9 @@ private fun MealCard(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .longPressDraggableHandle(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(

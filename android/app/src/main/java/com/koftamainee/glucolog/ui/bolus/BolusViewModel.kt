@@ -237,9 +237,12 @@ class BolusViewModel(
                 val mass = item.mass.toFloatOrNull() ?: 0f
                 acc + item.nutrients.carbs * mass / 100f
             }.roundToLong().toInt()
+            val meals = dayRepo.getDay(date).meals
+            val maxSortOrder = meals.maxOfOrNull { it.sortOrder } ?: 0
             dayRepo.setMealField(date, mealKey, MealField.TIME, currentTimeString())
             dayRepo.setMealField(date, mealKey, MealField.FOOD, text)
             dayRepo.setMealField(date, mealKey, MealField.CARBS, carbs.toString())
+            dayRepo.setMealSortOrder(date, mealKey, maxSortOrder + 1)
             _state.update { it.copy(message = "Еда вставлена в день") }
         }
     }

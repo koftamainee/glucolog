@@ -102,6 +102,8 @@ class DayViewModel(
 
     fun deleteMeal(id: Long) = launch { repo.deleteMeal(id) }
 
+    fun reorderMeals(orderedIds: List<Long>) = launch { repo.reorderMeals(orderedIds) }
+
 
     fun toggleStool(option: String) = launch { repo.toggleStool(_date.value, option) }
 
