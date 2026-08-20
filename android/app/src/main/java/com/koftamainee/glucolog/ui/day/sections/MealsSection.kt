@@ -34,7 +34,6 @@ import com.koftamainee.glucolog.ui.components.PrimaryAddButton
 import com.koftamainee.glucolog.ui.components.TimeField
 import sh.calvin.reorderable.ReorderableColumn
 import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.longPressDraggableHandle
 
 @Composable
 fun MealsSection(
@@ -92,6 +91,7 @@ fun MealsSection(
                             meal = meal,
                             onSetField = { field, value -> onSetField(meal.key, field, value) },
                             onDelete = { onDelete(meal.id) },
+                            dragHandleModifier = Modifier.longPressDraggableHandle(),
                         )
                     }
                 }
@@ -111,6 +111,7 @@ private fun MealCard(
     meal: MealEntity?,
     onSetField: (MealField, String?) -> Unit,
     onDelete: () -> Unit,
+    dragHandleModifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = Modifier
@@ -124,7 +125,7 @@ private fun MealCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .longPressDraggableHandle(),
+                    .then(dragHandleModifier),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
