@@ -1,4 +1,4 @@
-package com.koftamainee.glucolog.ui.bolus
+package com.koftamainee.glucolog.ui.food
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -71,7 +71,7 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 
 @Composable
-fun BolusScreen(viewModel: BolusViewModel) {
+fun FoodScreen(viewModel: FoodViewModel) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
 
@@ -131,8 +131,8 @@ fun BolusScreen(viewModel: BolusViewModel) {
                     onToggleActualAuto = viewModel::toggleActualGlucoseAuto,
                     onActiveInsulinChange = viewModel::onActiveInsulinChange,
                     onToggleActiveAuto = viewModel::toggleActiveInsulinAuto,
-                    onUgChange = viewModel::onUgChange,
-                    onToggleUgAuto = viewModel::toggleUgAuto,
+                    onUkChange = viewModel::onUkChange,
+                    onToggleUkAuto = viewModel::toggleUkAuto,
                     onFchiChange = viewModel::onFchiChange,
                     onToggleFchiAuto = viewModel::toggleFchiAuto,
                     onMassChange = viewModel::updateMass,
@@ -225,15 +225,15 @@ private fun SourceBadge(product: ProductEntity) {
 
 @Composable
 private fun CalculationTab(
-    state: BolusUiState,
+    state: FoodUiState,
     onAddFood: () -> Unit,
     onTargetGlucoseChange: (String) -> Unit,
     onActualGlucoseChange: (String) -> Unit,
     onToggleActualAuto: () -> Unit,
     onActiveInsulinChange: (String) -> Unit,
     onToggleActiveAuto: () -> Unit,
-    onUgChange: (String) -> Unit,
-    onToggleUgAuto: () -> Unit,
+    onUkChange: (String) -> Unit,
+    onToggleUkAuto: () -> Unit,
     onFchiChange: (String) -> Unit,
     onToggleFchiAuto: () -> Unit,
     onMassChange: (Int, String) -> Unit,
@@ -242,7 +242,7 @@ private fun CalculationTab(
     onWriteBolus: (Float) -> Unit,
     onClear: () -> Unit,
 ) {
-    val factorsBlocked = state.ugAuto && state.tdd == null
+    val factorsBlocked = state.ukAuto && state.tdd == null
     val sugarBlocked = state.actualGlucose.trim().isEmpty()
     val result = remember(state) {
         computeResult(state)
@@ -310,11 +310,11 @@ private fun CalculationTab(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     AutoFieldRow(
-                        label = "УГ",
-                        value = state.ug,
-                        onValueChange = onUgChange,
-                        auto = state.ugAuto,
-                        onToggleAuto = onToggleUgAuto,
+                        label = "УК",
+                        value = state.uk,
+                        onValueChange = onUkChange,
+                        auto = state.ukAuto,
+                        onToggleAuto = onToggleUkAuto,
                         modifier = Modifier.weight(1f),
                     )
                     AutoFieldRow(
@@ -340,7 +340,7 @@ private fun CalculationTab(
                 }
                 when {
                     factorsBlocked -> Text(
-                        text = "Нет данных за неделю — укажите УГ/ФЧИ вручную",
+                        text = "Нет данных за неделю — укажите УК/ФЧИ вручную",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -357,7 +357,7 @@ private fun CalculationTab(
             if (result == null) {
                 Text(
                     text = when {
-                        factorsBlocked -> "Нет данных за неделю — укажите УГ/ФЧИ вручную."
+                        factorsBlocked -> "Нет данных за неделю — укажите УК/ФЧИ вручную."
                         sugarBlocked -> "Нет данных о сахаре — укажите текущий сахар (АГ)."
                         else -> "Добавьте еду и введите массу, чтобы рассчитать инсулин."
                     },
@@ -729,8 +729,8 @@ private fun ResultRow(label: String, value: String) {
 private fun nutrientsText(item: FoodItem): String =
     "Б ${fmt(item.nutrients.proteins)} · Ж ${fmt(item.nutrients.fats)} · У ${fmt(item.nutrients.carbs)} · ${fmt(item.nutrients.kcal)} ккал"
 
-private fun computeResult(state: BolusUiState): BolusResult? {
-    if (state.ugAuto && state.tdd == null) return null
+private fun computeResult(state: FoodUiState): BolusResult? {
+    if (state.ukAuto && state.tdd == null) return null
     if (state.actualGlucose.trim().isEmpty()) return null
     val items = state.foodItems.mapNotNull { item ->
         val mass = item.mass.toFloatOrNull() ?: return@mapNotNull null
@@ -739,7 +739,7 @@ private fun computeResult(state: BolusUiState): BolusResult? {
     if (items.isEmpty()) return null
     return BolusCalculator.calculate(
         items = items,
-        ug = state.ug.toFloatOrNull() ?: 0f,
+        uk = state.uk.toFloatOrNull() ?: 0f,
         fchi = state.fchi.toFloatOrNull() ?: 0f,
         targetGlucose = state.targetGlucose.toFloatOrNull() ?: 0f,
         actualGlucose = state.actualGlucose.toFloatOrNull() ?: 0f,

@@ -63,7 +63,7 @@ class BolusCalculatorTest {
         )
         val result = BolusCalculator.calculate(
             items = items,
-            ug = 0.48f,
+            uk = 0.48f,
             fchi = 5f,
             targetGlucose = 5f,
             actualGlucose = 5f,
@@ -85,7 +85,7 @@ class BolusCalculatorTest {
         )
         val result = BolusCalculator.calculate(
             items = items,
-            ug = 0.48f,
+            uk = 0.48f,
             fchi = 5f,
             targetGlucose = 5f,
             actualGlucose = 5f,
@@ -98,7 +98,7 @@ class BolusCalculatorTest {
     fun correctionIsZeroWhenActualEqualsTarget() {
         val result = BolusCalculator.calculate(
             items = listOf(FoodPortion(kovrizhka, 142f)),
-            ug = 0.48f,
+            uk = 0.48f,
             fchi = 5f,
             targetGlucose = 5f,
             actualGlucose = 5f,
@@ -111,7 +111,7 @@ class BolusCalculatorTest {
     fun correctionPositiveAboveTarget() {
         val result = BolusCalculator.calculate(
             items = emptyList(),
-            ug = 0.48f,
+            uk = 0.48f,
             fchi = 5f,
             targetGlucose = 5f,
             actualGlucose = 10f,
@@ -125,7 +125,7 @@ class BolusCalculatorTest {
     fun activeInsulinSubtracted() {
         val result = BolusCalculator.calculate(
             items = listOf(FoodPortion(kovrizhka, 142f)),
-            ug = 0.48f,
+            uk = 0.48f,
             fchi = 5f,
             targetGlucose = 5f,
             actualGlucose = 5f,
@@ -138,7 +138,7 @@ class BolusCalculatorTest {
     fun zeroDoseIsSafe() {
         val result = BolusCalculator.calculate(
             items = listOf(FoodPortion(kovrizhka, 142f)),
-            ug = 0f,
+            uk = 0f,
             fchi = 0f,
             targetGlucose = 5f,
             actualGlucose = 5f,
@@ -153,7 +153,7 @@ class BolusCalculatorTest {
     fun emptyItems() {
         val result = BolusCalculator.calculate(
             items = emptyList(),
-            ug = 0.48f,
+            uk = 0.48f,
             fchi = 5f,
             targetGlucose = 5f,
             actualGlucose = 5f,

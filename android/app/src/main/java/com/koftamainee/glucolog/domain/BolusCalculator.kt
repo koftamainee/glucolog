@@ -49,7 +49,7 @@ object BolusCalculator {
 
     fun calculate(
         items: List<FoodPortion>,
-        ug: Float,
+        uk: Float,
         fchi: Float,
         targetGlucose: Float,
         actualGlucose: Float,
@@ -57,8 +57,8 @@ object BolusCalculator {
     ): BolusResult {
         val totalBu = items.fold(0f) { acc, it -> acc + breadUnits(it.nutrients.carbs, it.mass) }
         val totalBje = items.fold(0f) { acc, it -> acc + bje(it.nutrients.kcal, it.nutrients.carbs, it.mass) }
-        val insulinBu = round2(if (fchi == 0f) 0f else totalBu * ug / fchi)
-        val insulinBje = round2(if (fchi == 0f) 0f else totalBje * ug / fchi)
+        val insulinBu = round2(if (fchi == 0f) 0f else totalBu * uk / fchi)
+        val insulinBje = round2(if (fchi == 0f) 0f else totalBje * uk / fchi)
         val correction = round2(if (fchi == 0f) 0f else (actualGlucose - targetGlucose) / fchi)
         return BolusResult(
             breadUnits = round2(totalBu),

@@ -32,8 +32,8 @@ import com.koftamainee.glucolog.di.AppContainer
 import com.koftamainee.glucolog.domain.DateKeys
 import com.koftamainee.glucolog.ui.day.DayScreen
 import com.koftamainee.glucolog.ui.day.DayViewModel
-import com.koftamainee.glucolog.ui.bolus.BolusScreen
-import com.koftamainee.glucolog.ui.bolus.BolusViewModel
+import com.koftamainee.glucolog.ui.food.FoodScreen
+import com.koftamainee.glucolog.ui.food.FoodViewModel
 import com.koftamainee.glucolog.ui.importexport.ImportExportScreen
 import com.koftamainee.glucolog.ui.importexport.ImportExportViewModel
 import com.koftamainee.glucolog.ui.roam.RoamScreen
@@ -85,9 +85,9 @@ fun AppNavHost(container: AppContainer) {
                         onOpenChartSettings = { navController.navigate("chart-settings") },
                     )
                 }
-                composable("bolus") {
-                    val vm: BolusViewModel = viewModel(factory = BolusViewModel.factory(container))
-                    BolusScreen(viewModel = vm)
+                composable("food") {
+                    val vm: FoodViewModel = viewModel(factory = FoodViewModel.factory(container))
+                    FoodScreen(viewModel = vm)
                 }
                 composable("chart-settings") {
                     val vm: ChartSettingsViewModel = viewModel(factory = ChartSettingsViewModel.factory(container))
@@ -119,7 +119,7 @@ private fun BottomNav(navController: NavHostController) {
 
     val tabs = listOf(
         BottomTab("day", "День", Icons.Filled.DateRange),
-        BottomTab("bolus", "Калькулятор", Icons.Filled.Calculate),
+        BottomTab("food", "Калькулятор", Icons.Filled.Calculate),
         BottomTab("io", "Настройки", Icons.AutoMirrored.Filled.List),
     )
 

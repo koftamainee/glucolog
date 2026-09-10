@@ -1,4 +1,4 @@
-package com.koftamainee.glucolog.ui.bolus
+package com.koftamainee.glucolog.ui.food
 
 import android.content.Context
 import android.net.Uri
@@ -39,12 +39,12 @@ data class FoodItem(
     val note: String? = null,
 )
 
-data class BolusUiState(
+data class FoodUiState(
     val foodItems: List<FoodItem> = emptyList(),
     val tdd: Float? = null,
-    val ug: String = "0.48",
+    val uk: String = "0.48",
     val fchi: String = "5",
-    val ugAuto: Boolean = true,
+    val ukAuto: Boolean = true,
     val fchiAuto: Boolean = true,
     val targetGlucose: String = "5",
     val actualGlucose: String = "",
@@ -60,7 +60,7 @@ data class BolusUiState(
     val tab: Int = 0,
 )
 
-class BolusViewModel(
+class FoodViewModel(
     private val productRepo: ProductRepository,
     private val settings: SettingsDataStore,
     private val dayRepo: DayRepository,
@@ -68,8 +68,8 @@ class BolusViewModel(
     private val appContext: Context,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(BolusUiState())
-    val state: StateFlow<BolusUiState> = _state
+    private val _state = MutableStateFlow(FoodUiState())
+    val state: StateFlow<FoodUiState> = _state
 
     private var xdripLastValue: Float? = null
     private var xdripLastDate: String? = null
@@ -169,13 +169,13 @@ class BolusViewModel(
         if (!_state.value.activeInsulinAuto.not()) refreshActiveInsulin()
     }
 
-    fun onUgChange(value: String) {
-        _state.update { it.copy(ug = value, ugAuto = false) }
+    fun onUkChange(value: String) {
+        _state.update { it.copy(uk = value, ukAuto = false) }
     }
 
-    fun toggleUgAuto() {
-        _state.update { it.copy(ugAuto = !it.ugAuto) }
-        if (!_state.value.ugAuto.not()) viewModelScope.launch { refreshFactors() }
+    fun toggleUkAuto() {
+        _state.update { it.copy(ukAuto = !it.ukAuto) }
+        if (!_state.value.ukAuto.not()) viewModelScope.launch { refreshFactors() }
     }
 
     fun onFchiChange(value: String) {
@@ -380,7 +380,7 @@ class BolusViewModel(
         _state.update { state ->
             state.copy(
                 tdd = tdd,
-                ug = if (state.ugAuto) autoUg(tdd) else state.ug,
+                uk = if (state.ukAuto) autoUk(tdd) else state.uk,
                 fchi = if (state.fchiAuto) autoFchi(tdd) else state.fchi,
             )
         }
@@ -395,7 +395,7 @@ class BolusViewModel(
         _state.update { it.copy(actualGlucose = if (value != null) format(value) else "") }
     }
 
-    private fun autoUg(tdd: Float?): String =
+    private fun autoUk(tdd: Float?): String =
         if (tdd != null) format(BolusCalculator.carbohydrateCoefficient(tdd)) else "0"
 
     private fun autoFchi(tdd: Float?): String =
@@ -440,7 +440,7 @@ class BolusViewModel(
     companion object {
         fun factory(container: AppContainer) = viewModelFactory {
             initializer {
-                BolusViewModel(
+                FoodViewModel(
                     container.productRepository,
                     container.settingsDataStore,
                     container.dayRepository,
