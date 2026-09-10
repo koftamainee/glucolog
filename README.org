@@ -24,6 +24,11 @@ Glucolog - приложение на Android для учета и контрол
 - Генерация отчетов и параметров за долгий промежуток времени для врачей-эндокринологов
 
 * Интерфейс приложения
-[[./assets/GlucologMainScreen.jpg]]
-[[./assets/GlucologFoodCalculatorSection.jpg]]
-[[./assets/GlucologMainScreenFoodSection.jpg]]
+
+#+BEGIN_HTML
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+  <img src="./assets/GlucologMainScreen.jpg" width="250" alt="Главный экран">
+  <img src="./assets/GlucologFoodCalculatorSection.jpg" width="250" alt="Калькулятор еды">
+  <img src="./assets/GlucologMainScreenFoodSection.jpg" width="250" alt="Раздел еды">
+</div>
+#+END_HTML
