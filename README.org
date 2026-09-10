@@ -8,10 +8,6 @@ Glucolog - приложение на Android для учета и контрол
 
 Актульную версию приложения можно найти в релизах, файл `app-release.apk`
 
-[[./assets/GlucologMainScreen.jpg]]
-[[./assets/GlucologFoodCalculatorSection.jpg]]
-[[./assets/GlucologMainScreenFoodSection.jpg]]
-
 * Возможности
 - Сохранение данных о глюкозе и импорт/экспорт в csv/json.
 - Синхронизация данных с XDrip+ для автоматического учета глюкозы
@@ -26,3 +22,8 @@ Glucolog - приложение на Android для учета и контрол
 * TBD
 - Автоматический бэкап данных на Google drive или nightscout/nocturne
 - Генерация отчетов и параметров за долгий промежуток времени для врачей-эндокринологов
+
+* Интерфейс приложения
+[[./assets/GlucologMainScreen.jpg]]
+[[./assets/GlucologFoodCalculatorSection.jpg]]
+[[./assets/GlucologMainScreenFoodSection.jpg]]
