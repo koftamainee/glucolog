@@ -47,6 +47,7 @@ import com.koftamainee.glucolog.domain.fmtDurationMinutes
 import com.koftamainee.glucolog.domain.fmtG
 import com.koftamainee.glucolog.domain.fmtPct
 import com.koftamainee.glucolog.domain.pluralDays
+import com.koftamainee.glucolog.domain.tirBarSegments
 import com.koftamainee.glucolog.ui.components.SectionCard
 import com.koftamainee.glucolog.ui.components.SelectChip
 import com.koftamainee.glucolog.ui.theme.GlucologGreen
@@ -238,7 +239,7 @@ private fun SummaryPreview(report: ReportModel) {
 @Composable
 private fun TirBar(bands: List<RangeBand>) {
     Row(modifier = Modifier.fillMaxWidth().height(14.dp)) {
-        bands.forEach { band ->
+        tirBarSegments(bands).forEach { band ->
             Box(
                 modifier = Modifier
                     .weight(band.percent)

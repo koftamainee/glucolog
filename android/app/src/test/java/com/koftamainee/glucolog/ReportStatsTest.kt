@@ -14,6 +14,7 @@ import com.koftamainee.glucolog.domain.hba1cFromMeanMmol
 import com.koftamainee.glucolog.domain.hba1cPercentToMmolMol
 import com.koftamainee.glucolog.domain.hyperEpisodes
 import com.koftamainee.glucolog.domain.hypoEpisodes
+import com.koftamainee.glucolog.domain.tirBarSegments
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -154,6 +155,37 @@ class ReportStatsTest {
         assertEquals(9.5f, episodes[0].minG, 0.001f)
         assertTrue(episodes[1].night)
         assertEquals(9.9f, episodes[1].minG, 0.001f)
+    }
+
+    @Test
+    fun `tir bar segments drop empty bands so compose weight stays positive`() {
+        // Ни одного показания ниже 3.0 — полоса VERY_LOW пуста и не рисуется.
+        val readings = List(10) { ReportReading("2026-10-01", 8f, 5f, "xdrip") }
+        val bands = bandPercent(readings, 4f, 8f)
+
+        val segments = tirBarSegments(bands)
+        assertTrue(segments.isNotEmpty())
+        assertTrue(segments.none { it.percent <= 0f })
+        assertEquals(5, bands.size)
+        assertEquals(1, segments.size)
+        assertEquals(RangeBandKind.TARGET, segments[0].kind)
+    }
+
+    @Test
+    fun `tir bar segments keep every band when all of them have readings`() {
+        val readings = listOf(
+            ReportReading("2026-10-01", 1f, 2.5f, "xdrip"),
+            ReportReading("2026-10-01", 2f, 3.5f, "xdrip"),
+            ReportReading("2026-10-01", 3f, 6f, "xdrip"),
+            ReportReading("2026-10-01", 4f, 12f, "xdrip"),
+            ReportReading("2026-10-01", 5f, 18f, "xdrip"),
+        )
+        val bands = bandPercent(readings, 4f, 8f)
+
+        val segments = tirBarSegments(bands)
+        assertEquals(5, segments.size)
+        // Пропорции не искажаются: сумма весов равна сумме процентов всех полос.
+        assertEquals(100f, segments.sumOf { it.percent.toDouble() }.toFloat(), 0.01f)
     }
 
     @Test

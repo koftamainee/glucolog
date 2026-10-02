@@ -63,6 +63,16 @@ fun bandPercent(
     )
 }
 
+/**
+ * Полосы, которые реально что-то занимают на шкале TIR.
+ *
+ * У полосы с нулевой долей нет смысла рисовать сегмент, а `Modifier.weight` в Compose
+ * требует строго положительный вес и бросает `IllegalArgumentException` на нуле —
+ * поэтому такие полосы отфильтровываем. Пропорции оставшихся сегментов не меняются:
+ * веса в Row относительные.
+ */
+fun tirBarSegments(bands: List<RangeBand>): List<RangeBand> = bands.filter { it.percent > 0f }
+
 fun isNightHour(h: Float): Boolean {
     val t = h % 24f
     return t >= ReportStats.NIGHT_FROM || t < ReportStats.NIGHT_TO
