@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -38,6 +39,8 @@ import com.koftamainee.glucolog.ui.importexport.ImportExportScreen
 import com.koftamainee.glucolog.ui.importexport.ImportExportViewModel
 import com.koftamainee.glucolog.ui.roam.RoamScreen
 import com.koftamainee.glucolog.ui.roam.RoamViewModel
+import com.koftamainee.glucolog.ui.reports.ReportsScreen
+import com.koftamainee.glucolog.ui.reports.ReportsViewModel
 import com.koftamainee.glucolog.ui.settings.ChartSettingsScreen
 import com.koftamainee.glucolog.ui.settings.ChartSettingsViewModel
 import com.koftamainee.glucolog.ui.xdrip.XdripSetupScreen
@@ -89,6 +92,10 @@ fun AppNavHost(container: AppContainer) {
                     val vm: FoodViewModel = viewModel(factory = FoodViewModel.factory(container))
                     FoodScreen(viewModel = vm)
                 }
+                composable("reports") {
+                    val vm: ReportsViewModel = viewModel(factory = ReportsViewModel.factory(container))
+                    ReportsScreen(viewModel = vm)
+                }
                 composable("chart-settings") {
                     val vm: ChartSettingsViewModel = viewModel(factory = ChartSettingsViewModel.factory(container))
                     ChartSettingsScreen(
@@ -120,6 +127,7 @@ private fun BottomNav(navController: NavHostController) {
     val tabs = listOf(
         BottomTab("day", "День", Icons.Filled.DateRange),
         BottomTab("food", "Калькулятор", Icons.Filled.Calculate),
+        BottomTab("reports", "Отчёт", Icons.Filled.Description),
         BottomTab("io", "Настройки", Icons.AutoMirrored.Filled.List),
     )
 
