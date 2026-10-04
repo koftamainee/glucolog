@@ -13,6 +13,7 @@ import com.koftamainee.glucolog.domain.fmtDateShort
 import com.koftamainee.glucolog.domain.fmtDateWeekday
 import com.koftamainee.glucolog.domain.fmtDurationMinutes
 import com.koftamainee.glucolog.domain.fmtG
+import com.koftamainee.glucolog.domain.fmtG2
 import com.koftamainee.glucolog.domain.fmtInt
 import com.koftamainee.glucolog.domain.fmtPct
 import com.koftamainee.glucolog.domain.parseDateKey
@@ -428,8 +429,8 @@ private class Doc(private val model: ReportModel) : Closeable {
                 "Базальный" to "${fmtG(model.basalPerDay)} ед.",
                 "Болюсный" to "${fmtG(model.bolusPerDay)} ед.",
                 "Углеводы в сутки" to "${fmtG(model.carbsPerDay)} г",
-                "Ед. на 1 г углеводов" to fmtG(model.bolusCarbRatio),
-                "Доля базального" to "${fmtG(basalShare())}%",
+                "Ед. на 1 г углеводов" to fmtG2(model.bolusCarbRatio),
+                "Доля базального" to (basalShare()?.let { "${fmtPct(it)}%" } ?: "—"),
             ),
         )
     }

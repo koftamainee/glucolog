@@ -45,6 +45,7 @@ import com.koftamainee.glucolog.domain.RangeBandKind
 import com.koftamainee.glucolog.domain.ReportModel
 import com.koftamainee.glucolog.domain.fmtDurationMinutes
 import com.koftamainee.glucolog.domain.fmtG
+import com.koftamainee.glucolog.domain.fmtG2
 import com.koftamainee.glucolog.domain.fmtPct
 import com.koftamainee.glucolog.domain.pluralDays
 import com.koftamainee.glucolog.domain.tirBarSegments
@@ -217,7 +218,7 @@ private fun SummaryPreview(report: ReportModel) {
 
     SectionCard("Инсулинотерапия и питание") {
         MetricRow("Суточная доза инсулина", "${fmtG(report.tddPerDay)} ед. (базал ${fmtG(report.basalPerDay)}, болюс ${fmtG(report.bolusPerDay)})")
-        MetricRow("Углеводы в сутки", "${fmtG(report.carbsPerDay)} г · ${fmtG(report.bolusCarbRatio)} ед./г")
+        MetricRow("Углеводы в сутки", "${fmtG(report.carbsPerDay)} г · ${fmtG2(report.bolusCarbRatio)} ед./г")
         MetricRow("Гипогликемий (всего)", "${report.hypoCount}")
         MetricRow("Гипогликемий (ночных)", "${report.nightHypoCount}")
         MetricRow("Гипергликемий (всего)", "${report.hyperCount}")
