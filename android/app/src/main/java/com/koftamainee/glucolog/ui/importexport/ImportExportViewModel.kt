@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -13,6 +14,7 @@ import com.koftamainee.glucolog.data.ProductRepository
 import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.data.ThemeMode
 import com.koftamainee.glucolog.data.backup.BackupPayload
+import com.koftamainee.glucolog.data.backup.DriveAuth
 import com.koftamainee.glucolog.data.backup.DriveAuthException
 import com.koftamainee.glucolog.data.backup.DriveBackup
 import com.koftamainee.glucolog.data.backup.GoogleAuthFlow
@@ -24,6 +26,7 @@ import com.koftamainee.glucolog.data.importexport.ImportedFile
 import com.koftamainee.glucolog.data.importexport.ImportCoordinator
 import com.koftamainee.glucolog.data.importexport.JsonCodec
 import com.koftamainee.glucolog.di.AppContainer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +34,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 enum class ExportKind { JSON, CSV }
 
@@ -122,6 +126,7 @@ class ImportExportViewModel(
     }
 
     fun showDriveBackups() {
+        Log.d(TAG, "showDriveBackups email=${_googleEmail.value}")
         if (_googleEmail.value == null) {
             requestAuthorization {
                 openDriveBackups()
@@ -132,6 +137,7 @@ class ImportExportViewModel(
     }
 
     private fun openDriveBackups() {
+        _driveBackups.value = null
         _driveBackupsVisible.value = true
         loadDriveBackups()
     }
@@ -140,33 +146,52 @@ class ImportExportViewModel(
         _driveBackupsVisible.value = false
     }
 
-    fun loadDriveBackups() {
+    fun loadDriveBackups(allowAuthRetry: Boolean = true) {
         launch {
-            _busy.value = true
-            try {
+            Log.d(TAG, "loadDriveBackups start retry=$allowAuthRetry")
+            val needsAuth = try {
+                _busy.value = true
                 val auth = GoogleDriveClient.authorizeSilently(appContext)
-                _driveBackups.value = driveClient.listBackups(auth.accessToken)
+                Log.d(TAG, "silent auth ok email=${auth.email}")
+                val list = withContext(Dispatchers.IO) {
+                    driveClient.listBackups(auth.accessToken)
+                }
+                Log.d(TAG, "listBackups -> ${list.size} items")
+                _driveBackups.value = list
+                false
             } catch (e: DriveAuthException) {
+                Log.w(TAG, "loadDriveBackups: auth required", e)
+                GoogleDriveClient.clearAuthCache()
                 settings.setBackupGoogleEmail(null)
                 _googleEmail.value = null
-                _message.value = "Требуется вход в Google"
                 _driveBackups.value = emptyList()
+                _message.value = "Требуется вход в Google"
+                allowAuthRetry
             } catch (e: Exception) {
+                Log.e(TAG, "loadDriveBackups failed", e)
                 _message.value = e.message ?: "Не удалось получить список бэкапов"
                 _driveBackups.value = emptyList()
+                false
             } finally {
                 _busy.value = false
+            }
+            if (needsAuth) {
+                requestAuthorization { loadDriveBackups(allowAuthRetry = false) }
             }
         }
     }
 
-    fun importDriveBackup(backup: DriveBackup) {
+    fun importDriveBackup(backup: DriveBackup, allowAuthRetry: Boolean = true) {
         launch {
-            _busy.value = true
-            try {
+            val needsAuth = try {
+                _busy.value = true
                 val auth = GoogleDriveClient.authorizeSilently(appContext)
-                val text = driveClient.downloadBackup(auth.accessToken, backup.id)
+                val text = withContext(Dispatchers.IO) {
+                    driveClient.downloadBackup(auth.accessToken, backup.id)
+                }
+                Log.d(TAG, "downloaded ${text.length} bytes, preview=${text.take(200)}")
                 val parsed = BackupPayload.parse(text)
+                Log.d(TAG, "parsed days=${parsed.days.size} products=${parsed.products.size}")
                 if (parsed.days.isEmpty() && parsed.products.isEmpty()) {
                     _message.value = "Бэкап пуст"
                     return@launch
@@ -180,14 +205,23 @@ class ImportExportViewModel(
                     applyImport(replace = !repo.hasData())
                 }
                 _driveBackupsVisible.value = false
+                false
             } catch (e: DriveAuthException) {
+                Log.w(TAG, "importDriveBackup: auth required", e)
+                GoogleDriveClient.clearAuthCache()
                 settings.setBackupGoogleEmail(null)
                 _googleEmail.value = null
                 _message.value = "Требуется вход в Google"
+                allowAuthRetry
             } catch (e: Exception) {
+                Log.e(TAG, "importDriveBackup failed", e)
                 _message.value = e.message ?: "Не удалось импортировать с Диска"
+                false
             } finally {
                 _busy.value = false
+            }
+            if (needsAuth) {
+                requestAuthorization { importDriveBackup(backup, allowAuthRetry = false) }
             }
         }
     }
@@ -232,7 +266,8 @@ class ImportExportViewModel(
             _busy.value = true
             try {
                 when (val outcome = authFlow.authorize()) {
-                    is GoogleAuthFlow.Outcome.Success -> finishAuthorization(outcome.email)
+                    is GoogleAuthFlow.Outcome.Success ->
+                        finishAuthorization(outcome.email, outcome.accessToken)
                     is GoogleAuthFlow.Outcome.NeedsResolution ->
                         _authResolution.value = outcome.sender
                     is GoogleAuthFlow.Outcome.Failure -> {
@@ -252,7 +287,8 @@ class ImportExportViewModel(
             _busy.value = true
             try {
                 when (val outcome = authFlow.completeResolution(resultCode, data)) {
-                    is GoogleAuthFlow.Outcome.Success -> finishAuthorization(outcome.email)
+                    is GoogleAuthFlow.Outcome.Success ->
+                        finishAuthorization(outcome.email, outcome.accessToken)
                     is GoogleAuthFlow.Outcome.NeedsResolution -> {
                         pendingAction = null
                         _message.value = "Доступ к Google Диску не предоставлен"
@@ -268,7 +304,10 @@ class ImportExportViewModel(
         }
     }
 
-    private suspend fun finishAuthorization(email: String?) {
+    private suspend fun finishAuthorization(email: String?, accessToken: String?) {
+        if (!accessToken.isNullOrEmpty()) {
+            GoogleDriveClient.cacheAuth(DriveAuth(accessToken, email))
+        }
         val displayEmail = authFlow.applySuccess(email)
         _googleEmail.value = displayEmail
         _message.value = "Google Диск подключён"
@@ -294,6 +333,8 @@ class ImportExportViewModel(
     }
 
     companion object {
+        private const val TAG = "GlucologDrive"
+
         fun factory(container: AppContainer) = viewModelFactory {
             initializer {
                 ImportExportViewModel(

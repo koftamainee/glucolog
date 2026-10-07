@@ -23,7 +23,7 @@ class GoogleAuthFlow(
 ) {
 
     sealed class Outcome {
-        data class Success(val email: String?) : Outcome()
+        data class Success(val email: String?, val accessToken: String?) : Outcome()
         data class NeedsResolution(val sender: IntentSender) : Outcome()
         data class Failure(val message: String) : Outcome()
     }
@@ -95,6 +95,7 @@ class GoogleAuthFlow(
                     Log.w(TAG, "revokeToken failed", e)
                 }
             }
+            GoogleDriveClient.clearAuthCache()
         }
         settings.setBackupGoogleEmail(null)
         settings.setBackupEnabled(false)
@@ -119,13 +120,13 @@ class GoogleAuthFlow(
     private suspend fun outcomeFrom(result: AuthorizationResult, stage: String): Outcome {
         logResult(stage, result)
         val token = GoogleDriveClient.accessTokenFrom(result)
-        if (!token.isNullOrEmpty()) {
-            var email = GoogleDriveClient.emailFromResult(result)
-            if (email.isNullOrEmpty()) {
-                email = GoogleDriveClient.resolveEmail(token)
+            if (!token.isNullOrEmpty()) {
+                var email = GoogleDriveClient.emailFromResult(result)
+                if (email.isNullOrEmpty()) {
+                    email = GoogleDriveClient.resolveEmail(token)
+                }
+                return Outcome.Success(email, token)
             }
-            return Outcome.Success(email)
-        }
         if (result.hasResolution()) {
             val sender = result.pendingIntent?.intentSender
             if (sender != null) return Outcome.NeedsResolution(sender)

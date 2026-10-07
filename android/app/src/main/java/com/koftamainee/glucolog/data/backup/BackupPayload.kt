@@ -53,9 +53,12 @@ object BackupPayload {
         } catch (e: Exception) {
             throw IllegalArgumentException("Неверный JSON бэкапа")
         }
-        val days = root.optJSONObject("days")
-            ?.let { JsonCodec.import(it.toString()) }
-            ?: emptyList()
+        val daysObj = root.optJSONObject("days")
+        val days = if (daysObj == null || daysObj.length() == 0) {
+            emptyList()
+        } else {
+            JsonCodec.import(daysObj.toString())
+        }
         val products = mutableListOf<ProductEntity>()
         root.optJSONArray("products")?.let { arr ->
             for (i in 0 until arr.length()) {

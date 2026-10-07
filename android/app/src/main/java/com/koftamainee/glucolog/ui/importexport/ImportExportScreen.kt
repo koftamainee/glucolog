@@ -176,24 +176,38 @@ fun ImportExportScreen(
             title = { Text("Бэкапы на Google Диске") },
             text = {
                 val list = driveBackups
-                when {
-                    list == null || (list.isEmpty() && busy) -> Text("Загрузка…")
-                    list.isEmpty() -> Text("Бэкапов не найдено")
-                    else -> {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            list.forEach { backup ->
-                                TextButton(
-                                    onClick = { viewModel.importDriveBackup(backup) },
-                                    enabled = !busy,
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Text(
-                                        text = formatDriveBackupName(backup),
+                Column {
+                    when {
+                        list == null || (list.isEmpty() && busy) -> Text("Загрузка…")
+                        list.isEmpty() -> Text("Бэкапов не найдено")
+                        else -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                list.forEach { backup ->
+                                    TextButton(
+                                        onClick = { viewModel.importDriveBackup(backup) },
+                                        enabled = !busy,
                                         modifier = Modifier.fillMaxWidth(),
-                                    )
+                                    ) {
+                                        Text(
+                                            text = formatDriveBackupName(backup),
+                                            modifier = Modifier.fillMaxWidth(),
+                                        )
+                                    }
                                 }
                             }
                         }
+                    }
+                    if (busy) {
+                        Spacer(Modifier.height(8.dp))
+                        Text("Обработка…")
+                    }
+                    message?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
                 }
             },

@@ -57,6 +57,7 @@ class BackupWorker(
             Result.success()
         } catch (e: DriveAuthException) {
             Log.e(TAG, "auth error", e)
+            GoogleDriveClient.clearAuthCache()
             settings.setBackupLastError("Требуется вход в Google")
             settings.setBackupGoogleEmail(null)
             settings.setBackupEnabled(false)

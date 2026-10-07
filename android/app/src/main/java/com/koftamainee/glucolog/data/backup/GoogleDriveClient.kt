@@ -2,6 +2,7 @@ package com.koftamainee.glucolog.data.backup
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.AuthorizationResult
 import com.google.android.gms.auth.api.identity.Identity
@@ -14,6 +15,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -41,14 +43,21 @@ class GoogleDriveClient {
     }
 
     fun listBackups(accessToken: String): List<DriveBackup> {
-        val folderId = findFolder(accessToken) ?: return emptyList()
-        return listFiles(accessToken, backupsQuery(folderId))
-            .filter { isBackupFileName(it.name) }
+        val folderId = findFolder(accessToken)
+        if (folderId == null) {
+            Log.d(TAG, "listBackups: folder not found")
+            return emptyList()
+        }
+        val raw = listFiles(accessToken, backupsQuery(folderId))
+        val result = raw.filter { isBackupFileName(it.name) }
             .sortedByDescending { it.createdTime }
+        Log.d(TAG, "listBackups: folder=$folderId raw=${raw.size} filtered=${result.size} " +
+            "names=${raw.take(5).map { it.name }}")
+        return result
     }
 
     private fun backupsQuery(folderId: String): String =
-        "'$folderId' in parents and name contains 'backup-' and trashed=false"
+        "'$folderId' in parents and trashed=false"
 
     private fun isBackupFileName(name: String): Boolean =
         name.startsWith("backup-") && name.endsWith(".json")
@@ -67,7 +76,9 @@ class GoogleDriveClient {
 
     private fun findFolder(accessToken: String): String? {
         val query = "name='$FOLDER_NAME' and mimeType='$FOLDER_MIME' and trashed=false"
-        return listFiles(accessToken, query).firstOrNull()?.id
+        val found = listFiles(accessToken, query).firstOrNull()
+        Log.d(TAG, "findFolder: ${found?.id ?: "not found"}")
+        return found?.id
     }
 
     private fun findOrCreateFolder(accessToken: String): String {
@@ -202,6 +213,7 @@ class GoogleDriveClient {
     }
 
     companion object {
+        private const val TAG = "GlucologDrive"
         const val DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file"
         const val FOLDER_NAME = "Glucolog"
         private const val FOLDER_MIME = "application/vnd.google-apps.folder"
@@ -252,20 +264,60 @@ class GoogleDriveClient {
 
         suspend fun authorizeSilently(context: Context): DriveAuth =
             withContext(Dispatchers.IO) {
+                freshCachedAuth()?.let {
+                    Log.d(TAG, "silent: using cached token")
+                    return@withContext it
+                }
+                Log.d(TAG, "silent: GMS authorize…")
                 val client = Identity.getAuthorizationClient(context)
-                val result = Tasks.await(client.authorize(buildAuthorizationRequest()))
+                val result = try {
+                    var r = Tasks.await(client.authorize(buildAuthorizationRequest()))
+                    if (accessTokenFrom(r).isNullOrEmpty() && r.hasResolution()) {
+                        Log.d(TAG, "silent: no token, retrying in 700ms")
+                        delay(700)
+                        r = Tasks.await(client.authorize(buildAuthorizationRequest()))
+                    }
+                    r
+                } catch (e: Exception) {
+                    Log.e(TAG, "silent: GMS authorize failed", e)
+                    throw DriveAuthException("Требуется вход в Google")
+                }
                 val token = accessTokenFrom(result)
                 if (token.isNullOrEmpty()) {
+                    Log.w(TAG, "silent: no token hasResolution=${result.hasResolution()}")
                     if (result.hasResolution()) {
                         throw DriveAuthException("Требуется вход в Google")
                     }
                     throw DriveAuthException("Нет токена доступа")
                 }
+                Log.d(TAG, "silent: token ok")
                 DriveAuth(
                     accessToken = token,
                     email = emailFromResult(result) ?: resolveEmail(token),
-                )
+                ).also { cacheAuth(it) }
             }
+
+        @Volatile
+        private var cachedAuth: DriveAuth? = null
+
+        @Volatile
+        private var cachedAt: Long = 0L
+
+        fun cacheAuth(auth: DriveAuth) {
+            cachedAuth = auth
+            cachedAt = System.currentTimeMillis()
+        }
+
+        fun clearAuthCache() {
+            cachedAuth = null
+            cachedAt = 0L
+        }
+
+        private fun freshCachedAuth(): DriveAuth? {
+            val auth = cachedAuth ?: return null
+            if (System.currentTimeMillis() - cachedAt > 45 * 60_000L) return null
+            return auth
+        }
 
         fun emailFromResult(result: AuthorizationResult): String? {
             val idToken = result.tokenResponseParams?.getString("id_token")

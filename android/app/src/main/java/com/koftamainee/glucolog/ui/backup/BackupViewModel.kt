@@ -12,10 +12,12 @@ import com.koftamainee.glucolog.data.DayRepository
 import com.koftamainee.glucolog.data.ProductRepository
 import com.koftamainee.glucolog.data.SettingsDataStore
 import com.koftamainee.glucolog.data.backup.BackupScheduler
+import com.koftamainee.glucolog.data.backup.DriveAuth
 import com.koftamainee.glucolog.data.backup.DriveAuthException
 import com.koftamainee.glucolog.data.backup.GoogleAuthFlow
 import com.koftamainee.glucolog.data.backup.GoogleDriveClient
 import com.koftamainee.glucolog.di.AppContainer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class BackupViewModel(
     private val repo: DayRepository,
@@ -88,13 +91,16 @@ class BackupViewModel(
             val auth = GoogleDriveClient.authorizeSilently(appContext)
             val stored = _googleEmail.value
             if (stored == null || stored == FALLBACK_EMAIL) {
-                val email = auth.email ?: GoogleDriveClient.resolveEmail(auth.accessToken)
+                val email = auth.email ?: withContext(Dispatchers.IO) {
+                    GoogleDriveClient.resolveEmail(auth.accessToken)
+                }
                 if (!email.isNullOrEmpty() && email != FALLBACK_EMAIL) {
                     settings.setBackupGoogleEmail(email)
                     _googleEmail.value = email
                 }
             }
         } catch (e: DriveAuthException) {
+            GoogleDriveClient.clearAuthCache()
             settings.setBackupGoogleEmail(null)
             _googleEmail.value = null
             if (settings.backupEnabled.first()) {
@@ -175,7 +181,8 @@ class BackupViewModel(
             _busy.value = true
             try {
                 when (val outcome = authFlow.authorize()) {
-                    is GoogleAuthFlow.Outcome.Success -> finishAuthorization(outcome.email)
+                    is GoogleAuthFlow.Outcome.Success ->
+                        finishAuthorization(outcome.email, outcome.accessToken)
                     is GoogleAuthFlow.Outcome.NeedsResolution ->
                         _authResolution.value = outcome.sender
                     is GoogleAuthFlow.Outcome.Failure -> {
@@ -196,7 +203,8 @@ class BackupViewModel(
             _busy.value = true
             try {
                 when (val outcome = authFlow.completeResolution(resultCode, data)) {
-                    is GoogleAuthFlow.Outcome.Success -> finishAuthorization(outcome.email)
+                    is GoogleAuthFlow.Outcome.Success ->
+                        finishAuthorization(outcome.email, outcome.accessToken)
                     is GoogleAuthFlow.Outcome.NeedsResolution -> {
                         pendingAction = null
                         _message.value = if (resultCode == 0) {
@@ -216,7 +224,10 @@ class BackupViewModel(
         }
     }
 
-    private suspend fun finishAuthorization(email: String?) {
+    private suspend fun finishAuthorization(email: String?, accessToken: String?) {
+        if (!accessToken.isNullOrEmpty()) {
+            GoogleDriveClient.cacheAuth(DriveAuth(accessToken, email))
+        }
         val displayEmail = authFlow.applySuccess(email)
         _googleEmail.value = displayEmail
         _message.value = "Google Диск подключён"
