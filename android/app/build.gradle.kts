@@ -102,5 +102,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.reorderable)
+    implementation(libs.play.services.auth)
     testImplementation(libs.junit)
 }

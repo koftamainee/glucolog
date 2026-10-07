@@ -31,6 +31,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.koftamainee.glucolog.di.AppContainer
 import com.koftamainee.glucolog.domain.DateKeys
+import com.koftamainee.glucolog.ui.backup.BackupScreen
+import com.koftamainee.glucolog.ui.backup.BackupViewModel
 import com.koftamainee.glucolog.ui.day.DayScreen
 import com.koftamainee.glucolog.ui.day.DayViewModel
 import com.koftamainee.glucolog.ui.food.FoodScreen
@@ -86,6 +88,7 @@ fun AppNavHost(container: AppContainer) {
                         viewModel = vm,
                         onOpenXdrip = { navController.navigate("xdrip") },
                         onOpenChartSettings = { navController.navigate("chart-settings") },
+                        onOpenBackup = { navController.navigate("backup") },
                     )
                 }
                 composable("food") {
@@ -106,6 +109,13 @@ fun AppNavHost(container: AppContainer) {
                 composable("xdrip") {
                     val vm: XdripSetupViewModel = viewModel(factory = XdripSetupViewModel.factory(container))
                     XdripSetupScreen(
+                        viewModel = vm,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable("backup") {
+                    val vm: BackupViewModel = viewModel(factory = BackupViewModel.factory(container))
+                    BackupScreen(
                         viewModel = vm,
                         onBack = { navController.popBackStack() },
                     )

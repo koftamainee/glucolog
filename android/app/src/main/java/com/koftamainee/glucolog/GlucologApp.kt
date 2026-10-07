@@ -25,6 +25,9 @@ class GlucologApp : Application() {
             container.productRepository.seedBuiltin(this@GlucologApp)
         }
         scheduleXdripBackfill()
+        appScope.launch {
+            container.backupScheduler.rescheduleIfEnabled()
+        }
     }
 
     private fun scheduleXdripBackfill() {

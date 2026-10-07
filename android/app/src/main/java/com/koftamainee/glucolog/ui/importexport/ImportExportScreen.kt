@@ -1,6 +1,7 @@
 package com.koftamainee.glucolog.ui.importexport
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,25 +24,34 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.koftamainee.glucolog.data.ThemeMode
+import com.koftamainee.glucolog.data.backup.DriveBackup
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun ImportExportScreen(
     viewModel: ImportExportViewModel,
     onOpenXdrip: () -> Unit = {},
     onOpenChartSettings: () -> Unit = {},
+    onOpenBackup: () -> Unit = {},
 ) {
     val busy by viewModel.busy.collectAsState()
     val message by viewModel.message.collectAsState()
     val pending by viewModel.pending.collectAsState()
     val needStrategy by viewModel.needStrategy.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
+    val authResolution by viewModel.authResolution.collectAsState()
+    val driveBackups by viewModel.driveBackups.collectAsState()
+    val driveBackupsVisible by viewModel.driveBackupsVisible.collectAsState()
 
     val jsonExportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -57,6 +67,16 @@ fun ImportExportScreen(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) viewModel.import(uri)
+    }
+    val authLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        viewModel.onAuthorizationResolutionDone(result.resultCode, result.data)
+    }
+
+    LaunchedEffect(authResolution) {
+        val sender = authResolution ?: return@LaunchedEffect
+        authLauncher.launch(IntentSenderRequest.Builder(sender).build())
     }
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
@@ -118,6 +138,11 @@ fun ImportExportScreen(
                 onClick = { importLauncher.launch(arrayOf("*/*")) },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Импорт JSON / CSV") }
+            Button(
+                onClick = viewModel::showDriveBackups,
+                enabled = !busy,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Импорт с Google Диска") }
 
             Spacer(Modifier.height(4.dp))
 
@@ -126,6 +151,14 @@ fun ImportExportScreen(
                 onClick = onOpenXdrip,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Настройка xDrip") }
+
+            Spacer(Modifier.height(4.dp))
+
+            Text("Резервное копирование", style = MaterialTheme.typography.titleMedium)
+            Button(
+                onClick = onOpenBackup,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Настройка бэкапа") }
 
             if (busy) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -137,11 +170,44 @@ fun ImportExportScreen(
         }
     }
 
+    if (driveBackupsVisible) {
+        AlertDialog(
+            onDismissRequest = viewModel::hideDriveBackups,
+            title = { Text("Бэкапы на Google Диске") },
+            text = {
+                val list = driveBackups
+                when {
+                    list == null || (list.isEmpty() && busy) -> Text("Загрузка…")
+                    list.isEmpty() -> Text("Бэкапов не найдено")
+                    else -> {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            list.forEach { backup ->
+                                TextButton(
+                                    onClick = { viewModel.importDriveBackup(backup) },
+                                    enabled = !busy,
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text(
+                                        text = formatDriveBackupName(backup),
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::hideDriveBackups) { Text("Закрыть") }
+            },
+        )
+    }
+
     if (pending != null && needStrategy) {
         AlertDialog(
             onDismissRequest = viewModel::cancelImport,
             title = { Text("Импорт данных") },
-            text = { Text("В приложении уже есть данные. Как применить импортируемые дни?") },
+            text = { Text("В приложении уже есть данные. Как применить импортируемые записи?") },
             confirmButton = {
                 TextButton(onClick = { viewModel.applyImport(replace = true) }) { Text("Заменить") }
             },
@@ -150,4 +216,16 @@ fun ImportExportScreen(
             },
         )
     }
+}
+
+private fun formatDriveBackupName(backup: DriveBackup): String {
+    val time = try {
+        Instant.parse(backup.createdTime)
+            .atZone(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+    } catch (e: Exception) {
+        backup.createdTime
+    }
+    val sizeKb = backup.sizeBytes / 1024
+    return "$time · ${sizeKb} КБ"
 }

@@ -5,6 +5,8 @@ import com.koftamainee.glucolog.data.DayRepository
 import com.koftamainee.glucolog.data.ProductRepository
 import com.koftamainee.glucolog.data.ReportRepository
 import com.koftamainee.glucolog.data.SettingsDataStore
+import com.koftamainee.glucolog.data.backup.BackupScheduler
+import com.koftamainee.glucolog.data.backup.GoogleDriveClient
 import com.koftamainee.glucolog.data.db.AppDatabase
 import com.koftamainee.glucolog.data.xdrip.XdripStatusProvider
 import com.koftamainee.glucolog.data.xdrip.XdripWebClient
@@ -20,4 +22,6 @@ class AppContainer(context: Context) {
         XdripStatusProvider(dayRepository, settingsDataStore)
     val productRepository: ProductRepository = ProductRepository(database)
     val reportRepository: ReportRepository = ReportRepository(database, settingsDataStore)
+    val driveClient: GoogleDriveClient = GoogleDriveClient()
+    val backupScheduler: BackupScheduler = BackupScheduler(appContext, settingsDataStore)
 }

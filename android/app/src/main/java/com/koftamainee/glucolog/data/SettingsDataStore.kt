@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -56,6 +58,15 @@ class SettingsDataStore(private val context: Context) {
     private val targetGlucoseKey = floatPreferencesKey("target_glucose")
     private val markerLevelBasalKey = floatPreferencesKey("marker_level_basal")
     private val markerLevelMealKey = floatPreferencesKey("marker_level_meal")
+    private val backupEnabledKey = booleanPreferencesKey("backup_enabled")
+    private val backupIntervalHoursKey = intPreferencesKey("backup_interval_hours")
+    private val backupKeepCountKey = intPreferencesKey("backup_keep_count")
+    private val backupDaysKey = booleanPreferencesKey("backup_days")
+    private val backupProductsKey = booleanPreferencesKey("backup_products")
+    private val backupLastTimeKey = longPreferencesKey("backup_last_time")
+    private val backupLastErrorKey = stringPreferencesKey("backup_last_error")
+    private val backupGoogleEmailKey = stringPreferencesKey("backup_google_email")
+    private val googleForcePickerKey = booleanPreferencesKey("google_force_picker")
 
     val markerLines: Flow<MarkerLineSettings> =
         context.dataStore.data.map { prefs ->
@@ -145,5 +156,74 @@ class SettingsDataStore(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[xdripConnectedKey] = value
         }
+    }
+
+    val backupEnabled: Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[backupEnabledKey] ?: false }
+
+    suspend fun setBackupEnabled(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[backupEnabledKey] = value }
+    }
+
+    val backupIntervalHours: Flow<Int> =
+        context.dataStore.data.map { prefs -> prefs[backupIntervalHoursKey] ?: 24 }
+
+    suspend fun setBackupIntervalHours(value: Int) {
+        context.dataStore.edit { prefs -> prefs[backupIntervalHoursKey] = value }
+    }
+
+    val backupKeepCount: Flow<Int> =
+        context.dataStore.data.map { prefs -> prefs[backupKeepCountKey] ?: 2 }
+
+    suspend fun setBackupKeepCount(value: Int) {
+        context.dataStore.edit { prefs -> prefs[backupKeepCountKey] = value }
+    }
+
+    val backupDays: Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[backupDaysKey] ?: true }
+
+    suspend fun setBackupDays(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[backupDaysKey] = value }
+    }
+
+    val backupProducts: Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[backupProductsKey] ?: true }
+
+    suspend fun setBackupProducts(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[backupProductsKey] = value }
+    }
+
+    val backupLastTime: Flow<Long> =
+        context.dataStore.data.map { prefs -> prefs[backupLastTimeKey] ?: 0L }
+
+    suspend fun setBackupLastTime(value: Long) {
+        context.dataStore.edit { prefs -> prefs[backupLastTimeKey] = value }
+    }
+
+    val backupLastError: Flow<String?> =
+        context.dataStore.data.map { prefs -> prefs[backupLastErrorKey] }
+
+    suspend fun setBackupLastError(value: String?) {
+        context.dataStore.edit { prefs ->
+            if (value == null) prefs.remove(backupLastErrorKey)
+            else prefs[backupLastErrorKey] = value
+        }
+    }
+
+    val backupGoogleEmail: Flow<String?> =
+        context.dataStore.data.map { prefs -> prefs[backupGoogleEmailKey] }
+
+    suspend fun setBackupGoogleEmail(value: String?) {
+        context.dataStore.edit { prefs ->
+            if (value == null) prefs.remove(backupGoogleEmailKey)
+            else prefs[backupGoogleEmailKey] = value
+        }
+    }
+
+    val googleForcePicker: Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[googleForcePickerKey] ?: false }
+
+    suspend fun setGoogleForcePicker(value: Boolean) {
+        context.dataStore.edit { prefs -> prefs[googleForcePickerKey] = value }
     }
 }
