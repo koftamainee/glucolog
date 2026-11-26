@@ -23,6 +23,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -116,11 +117,13 @@ fun DayScreen(
                         WaterSection(data = day, onSet = viewModel::setWater)
                     }
                     item(key = "sport") {
-                        SportSection(
-                            data = day,
-                            onSport = viewModel::setSport,
-                            onSteps = viewModel::setSteps,
-                        )
+                        key(day.date) {
+                            SportSection(
+                                data = day,
+                                onSport = viewModel::setSport,
+                                onSteps = viewModel::setSteps,
+                            )
+                        }
                     }
                     item(key = "stool") {
                         StoolSection(
